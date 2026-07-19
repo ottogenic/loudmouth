@@ -5,5 +5,10 @@
 ## Version: 1.0
 
 # Files
-Dialogue.lua
+# CopyChat first so its error handler is installed before any other Loudmouth
+# file loads -- this captures load-time errors in the files below.
+CopyChat.lua
+Personalities/DwarfFemaleHunterQuirky.lua
+Personalities/HumanFemaleWarlockProfessional.lua
 Loudmouth.lua
+UI.lua
