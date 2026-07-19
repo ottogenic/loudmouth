@@ -1,25 +1,40 @@
 Loudmouth = Loudmouth or {}
-Loudmouth.Dialogue = {
+Loudmouth.Personalities = Loudmouth.Personalities or {}
+
+Loudmouth.Personalities["DwarfFemaleHunterQuirky"] = {
     actions = {
-        ["AUTO_SHOT"] = {
+        ["Auto Shot"] = {
             weight = 1/300,
             lines = {
                 "Pew!",
                 "Take that, ya scallywag!",
                 "Just a little tickle!",
                 "Bite the bullet!",
+                "Pew pew pew!",
+                "Just keeping them honest.",
+                "Ticking away like a clock!",
             }
         },
-        ["AIMED_SHOT"] = {
+        ["Aimed Shot"] = {
             weight = 1/300,
             lines = {
                 "Bullseye!",
                 "Right in the kisser!",
                 "Couldn't miss if I tried!",
                 "Hold still, will ya?",
+                "Hold still, you beauty!",
+                "Don't blink, or you'll miss it!",
             }
         },
-        ["TRAP"] = {
+        ["Hunters Mark"] = {
+            weight = 1/10,
+            lines = {
+                "I've got my eye on you!",
+                "Nowhere to hide!",
+                "Marked for greatness (or death)!",
+            }
+        },
+        ["Trap"] = {
             weight = 1/10,
             lines = {
                 "Gotcha in a pinch!",
@@ -28,7 +43,7 @@ Loudmouth.Dialogue = {
                 "Stay put!",
             }
         },
-        ["PET_ATTACK"] = {
+        ["Pet Attack"] = {
             weight = 1/20,
             lines = {
                 "Get 'em, you big hairy beast!",
@@ -37,7 +52,7 @@ Loudmouth.Dialogue = {
                 "Squeeze 'em, ya big lug!",
             }
         },
-        ["MULTISHOT"] = {
+        ["Multishot"] = {
             weight = 1/50,
             lines = {
                 "Rain 'em down!",
@@ -45,6 +60,30 @@ Loudmouth.Dialogue = {
                 "Spread the love!",
             }
         },
+        ["Health Potion"] = {
+            weight = 1,
+            lines = {
+                "Tastes like cherries and magic!",
+                "A quick sip for the road.",
+                "Refreshing!",
+            }
+        },
+        ["Bandage"] = {
+            weight = 1,
+            lines = {
+                "Hold still, I'm a professional!",
+                "A bit of gauze and a lot of hope.",
+                "Stop squirming!",
+            }
+        },
+        ["Generic"] = {
+            weight = 1,
+            lines = {
+                "What was I saying?",
+                "Is it lunchtime yet?",
+                "I love the smell of gunpowder in the morning!",
+            }
+        }
     },
     zones = {
         ["Dun Modir"] = {
