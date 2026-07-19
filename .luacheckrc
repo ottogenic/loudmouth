@@ -1,5 +1,6 @@
 version = "5.1"
 globals = {
+    "date",
     "ARG",
     "C_Timer",
     "CreateFrame",

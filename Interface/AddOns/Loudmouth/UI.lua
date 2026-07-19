@@ -45,27 +45,27 @@ local function InitUI()
     local personalityButton = CreateFrame("Button", nil, Loudmouth.UIFrame, "UIPanelButtonTemplate")
     personalityButton:SetSize(150, 20)
     personalityButton:SetPoint("CENTER", 0, 10)
-    
+
     local function UpdatePersonalityButtonText()
         local text = "Personality: " .. (Loudmouth.CurrentPersonality or "None")
         personalityButton:SetText(text)
     end
-    
+
     UpdatePersonalityButtonText()
 
     personalityButton:SetScript("OnClick", function()
         local keys = {}
         for k, _ in pairs(Loudmouth.Personalities) do keys[#keys+1] = k end
-        
+
         if #keys == 0 then
-            print("|cFFFF00Loudmouth: No personalities loaded!|r")
+            print("|cFFFFFF00Loudmouth: No personalities loaded!|r")
             return
         end
 
         if not personalityButton.currentPos then personalityButton.currentPos = 0 end
         personalityButton.currentPos = personalityButton.currentPos + 1
         if personalityButton.currentPos > #keys then personalityButton.currentPos = 1 end
-        
+
         Loudmouth.CurrentPersonality = keys[personalityButton.currentPos]
         UpdatePersonalityButtonText()
     end)
@@ -94,24 +94,24 @@ local function InitUI()
         end
 
         local personality = Loudmouth.Personalities[Loudmouth.CurrentPersonality]
-        
+
         if not personality then
-            print("|cFFFF00Loudmouth: No personality found for " .. tostring(Loudmouth.CurrentPersonality) .. "!|r")
+            print("|cFFFFFF00Loudmouth: No personality found for " .. tostring(Loudmouth.CurrentPersonality) .. "!|r")
             return
         end
-        
+
         print("|cFF00FF00Loudmouth: Copy the following macros into your macro menu:|r")
-        
+
         local actions = {}
         for action, _ in pairs(personality.actions) do
             table.insert(actions, action)
         end
-        
+
         for _, action in ipairs(actions) do
             local macroText = string.format("/run Loudmouth.Trigger(\"%s\")\n/cast %s", action, action)
             print(string.format("|cFFFFFF00[%s]:|r %s", action, macroText))
         end
-        
+
         print("|cFF00FF00Loudmouth: Macro generation complete!|r")
     end
 
@@ -150,6 +150,6 @@ SlashCmdList["LOUDMOUTH"] = function()
     elseif Loudmouth.UIFrame then
         Loudmouth.UIFrame:Show()
     else
-        print("|cFFFF00Loudmouth: UI failed to initialize. Please reload.|r")
+            print("|cFFFFFF00Loudmouth: UI failed to initialize. Please reload.|r")
     end
 end
