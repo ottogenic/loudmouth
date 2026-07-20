@@ -42,7 +42,8 @@ local function StoreLine(_, text)
 end
 
 local function HookChatFrames()
-    for i = 1, NUM_CHAT_WINDOWS do
+    local numWindows = NUM_CHAT_WINDOWS or 10
+    for i = 1, numWindows do
         local cf = _G["ChatFrame" .. i]
         if cf and not cf.LoudmouthCopyHooked then
             hooksecurefunc(cf, "AddMessage", StoreLine)

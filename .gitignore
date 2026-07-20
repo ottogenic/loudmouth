@@ -1,2 +1,15 @@
 # Third-party reference addons — must NOT be committed
 addon_examples/
+
+# WoW UI simulator (wow-ui-sim) — large local build tool, kept out of git.
+# Clone/build locally per tests/README; the harness at tests/ui-test.sh IS tracked.
+tools/
+
+# Classic-Era WoW data drop used by the simulator for CASC textures/fonts.
+_classic_era_/
+
+# Shared WoW CASC game data (multi-GB) — local only, never commit.
+Data/
+
+# Generated UI-test artifacts (screenshots, dumps, logs).
+tests/ui-sim-results/

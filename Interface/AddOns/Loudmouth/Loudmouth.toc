@@ -1,4 +1,4 @@
-## Interface: 11503
+## Interface: 11507
 ## Title: Loudmouth
 ## Notes: An addon that makes your character talk based on actions and zones.
 ## Author: Otto

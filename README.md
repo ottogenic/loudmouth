@@ -51,5 +51,7 @@ Enable **Loudmouth** at the character-select AddOns screen, then log in.
 
 - Addon code lives under `Interface/AddOns/Loudmouth/` (see `AGENTS.md`).
 - Personality files: `Interface/AddOns/Loudmouth/Personalities/<race><gender><class><personality>.lua`.
-- Lint with `luacheck .` from the repo root before committing.
+- Lint with `luacheck .` from the repo root before committing (scoped by `.luacheckrc`
+  to our addon; vendored `tools/` and `_classic_era_/` are excluded).
+- Smoke-test the UI headlessly with `./tests/ui-test.sh` before pushing UI changes.
 - See `docs/` for the PRD, project checklist, and research notes.
