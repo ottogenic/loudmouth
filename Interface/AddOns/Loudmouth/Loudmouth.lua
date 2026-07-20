@@ -58,29 +58,29 @@ end
 
 -- Helper to get player info
 function Loudmouth.GetPlayerInfo()
-    local race, class, gender = Loudmouth.GetRace(), Loudmouth.GetClass(), Loudmouth.GetGender()
-    return race or "Unknown Race", class or "Unknown Class", gender or "Unknown Gender"
+    local race, class = Loudmouth.GetRace(), Loudmouth.GetClass()
+    return race or "Unknown Race", class or "Unknown Class"
 end
 
 -- Real WoW API calls for personality detection
 Loudmouth.GetRace = function() return UnitRace("player") end
 Loudmouth.GetClass = function() return UnitClass("player") end
-Loudmouth.GetGender = function() return ({ [2]="Male", [3]="Female" })[UnitGender("player")] end
 
 function Loudmouth.AutoDetectPersonality()
     local race = Loudmouth.GetRace()
     local class = Loudmouth.GetClass()
-    local gender = Loudmouth.GetGender()
 
-    -- Simple mapping logic
-    if race == "Human" and class == "Warlock" and gender == "Female" then
-        Loudmouth.CurrentPersonality = "HumanFemaleWarlockProfessional"
-    elseif race == "Dwarf" and class == "Hunter" and gender == "Female" then
-        Loudmouth.CurrentPersonality = "DwarfFemaleHunterQuirky"
-    else
-    -- Default to first available personality if no match
-    local firstPersonality = next(Loudmouth.Personalities)
-    Loudmouth.CurrentPersonality = firstPersonality
+    -- Try to find a personality that matches both race and class
+    for personalityName, _ in pairs(Loudmouth.Personalities) do
+        if personalityName:find(race) and personalityName:find(class) then
+            Loudmouth.CurrentPersonality = personalityName
+            break
+        end
+    end
+
+    if not Loudmouth.CurrentPersonality then
+        -- Default to first available personality if no match
+        Loudmouth.CurrentPersonality = next(Loudmouth.Personalities)
     end
 
     if Loudmouth.CurrentPersonality then
