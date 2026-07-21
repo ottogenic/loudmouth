@@ -38,10 +38,11 @@ test("Generate Macros button is clickable and handles a valid personality", func
     local btn = findChildButton("Generate Macros")
     assertNotNil(btn)
     -- Ensure a personality is selected so the handler takes its normal path.
-    Loudmouth.AutoDetectPersonality()
+    -- FilterPersonalities() runs in InitUI() and sets CurrentPersonality.
     assertNotNil(Loudmouth.CurrentPersonality)
     -- Clicking must not raise an error.
-    assertNotNil(pcall(function() btn:Click() end))
+    local ok, err = pcall(function() btn:Click() end)
+    assert(ok, err)
 end)
 
 test("Copy Errors button invokes the CopyChat module", function()

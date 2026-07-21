@@ -134,6 +134,9 @@ and `.product.db` from a real install into the repo, then symlink:
 
 ## Skill index
 
+- `agent-team-extend` — Loudmouth-specific Team routing: when to architect first vs code directly.
+- `agent-architect-extend` — Loudmouth-specific architecture/review scope and Classic-Era checks.
+- `agent-code-extend` — Loudmouth-specific coding guardrails for Lua 5.1, UI, macros, and verification.
+- `agent-review-extend` — Loudmouth-specific review bar and PR review checks.
+- `agent-test-extend` — how agent-test lints + headlessly renders the UI (`./tests/ui-test.sh`).
 - `personality-creator-project` — authoring/editing files under `Personalities/`.
-- `pr-review-project` — review bar and merge process for Loudmouth PRs.
-- `agent-test-project` — how agent-test lints + headlessly renders the UI (`./tests/ui-test.sh`).

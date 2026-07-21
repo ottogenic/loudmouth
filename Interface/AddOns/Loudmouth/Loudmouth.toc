@@ -3,6 +3,7 @@
 ## Notes: An addon that makes your character talk based on actions and zones.
 ## Author: Otto
 ## Version: 1.0
+## SavedVariables: LoudmouthDB
 
 # Files
 # CopyChat first so its error handler is installed before any other Loudmouth

@@ -10,7 +10,9 @@ globals = {
     "geterrorhandler",
     "GetCallstackHeight",
     "GetErrorCallstackHeight",
+    "GetLocale",
     "GetRealZoneText",
+    "GetSubZoneText",
     "GetTime",
     "hooksecurefunc",
     "Loudmouth",
@@ -21,6 +23,7 @@ globals = {
     "UIParent",
     "UnitClass",
     "UnitRace",
+    "UnitSex",
     "GetSpellInfo",
     "IsSpellKnown",
     "CreateMacro",
@@ -38,6 +41,15 @@ globals = {
     "UIDropDownMenu_SetText",
     "UIDropDownMenu_SetWidth",
     "UIDropDownMenu_SetSelectedValue",
+    -- Macro API
+    "DeleteMacro",
+    "EditMacro",
+    "GetMacroIndexByName",
+    "LoudmouthDB",
+    "GetNumMacros",
+    "GetMacroInfo",
+    "InCombatLockdown",
+    "LoudmouthConfigFrame",
 }
 
 -- Only lint our addon code. Everything else in this repo is either the
