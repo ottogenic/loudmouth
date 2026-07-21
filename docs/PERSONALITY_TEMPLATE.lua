@@ -61,9 +61,9 @@ Loudmouth._RawPersonalities["<Race><Gender><Class><Variant>"] = {
         ["Generic"] = {
             weight = 1,
             lines = {
-                "%s looks around curiously.",
-                "%s nods in acknowledgment.",
-                "%s takes a deep breath and steadies %self.",
+                "I should keep my eyes open.",
+                "Steady now. One step at a time.",
+                "Nothing wrong with a careful look around.",
             },
         },
     },
@@ -94,8 +94,8 @@ Loudmouth._RawPersonalities["<Race><Gender><Class><Variant>"] = {
     -- Keys are substrings.  When GetSubZoneText() contains the key
     -- (case-insensitive partial match), the engine picks a random line.
     --
-    -- Subzones are implemented by the core engine. A subzone roll happens once
-    -- per pending location visit; it does not keep rolling until it succeeds.
+    -- Subzones are implemented by the core engine. A subzone check happens once
+    -- per pending location visit; matched entries pick a random line directly.
     -- ==================================================================
     subzones = {
         -- Example entries (replace with subzones relevant to your character):
@@ -124,8 +124,8 @@ Loudmouth._RawPersonalities["<Race><Gender><Class><Variant>"] = {
     --      Pending major-zone lines trigger once at 100% when matched.
 --
 --   3. SUBZONE KEYWORD MATCH
-    --      If GetSubZoneText() contains a key from `subzones`, the subzone entry
-    --      gets one weighted roll for that location visit.
+--      If GetSubZoneText() contains a key from `subzones`, a random subzone
+--      line is selected and spoken once for that location visit.
 --
 --   4. ACTION ROLL
 --      The engine looks up the action name in `actions[action]`.

@@ -36,10 +36,10 @@ Loudmouth._RawPersonalities["<Race><Gender><Class><Personality>"] = {
         ["Generic"] = { weight = 1, lines = { "…" } }, -- REQUIRED fallback
     },
     zones = {
-        ["Zone Name"] = { weight = 0.10, lines = { "…", "…" } }, -- GetRealZoneText()
+        ["Zone Name"] = { lines = { "…", "…" } }, -- GetRealZoneText()
     },
     subzones = {
-        ["inn"] = { weight = 0.10, lines = { "…", "…" } }, -- keyword match
+        ["inn"] = { lines = { "…", "…" } }, -- keyword match
     },
 }
 ```
@@ -56,6 +56,7 @@ Loudmouth._RawPersonalities["<Race><Gender><Class><Personality>"] = {
    - Normal rotational spells: `1/100` to `1/50`
    - Signature / rare cooldowns (Lay on Hands): up to `1`
    - Pets: `1` (summoning is infrequent and characterful)
+   - Zone and subzone entries do not use weights; matched entries pick a random line directly.
 4. **Lines are short, in-character, and varied.** 3+ per bucket; no duplicates; fit a
    `/say` line. Keep the voice consistent with the personality archetype across all
    buckets (a Professional Warlock never sounds Quirky).
