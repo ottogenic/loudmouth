@@ -449,6 +449,22 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
                 "Home sweet home. The stone works have excellent acoustic",
                 "properties, and the dwarves seem to drink with enough passion",
                 "to rival a cult gathering.",
+                "The Great Forge is admirably efficient—heat, industry, and just enough danger to feel familiar.",
+                "Ironforge's stonework is impeccable. Even the summoning chambers could learn a thing or two.",
+            },
+        },
+        ["Iron Forge"] = {
+            weight = 0.15,
+            lines = {
+                "The Great Forge never sleeps, and neither do the dwarves who",
+                "work it. A spectacle of industry and soot.",
+            },
+        },
+        ["Dwarven Halls"] = {
+            weight = 0.15,
+            lines = {
+                "The halls beneath Ironforge are a marvel of stonework and",
+                "engineering, though the acoustics are rather dreadful.",
             },
         },
         ["Dun Morogh"] = {
