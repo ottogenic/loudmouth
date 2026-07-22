@@ -157,18 +157,33 @@ local function Populate()
 end
 
 local function BuildFrame()
+    if InCombatLockdown() then
+        return -- Do nothing during combat; user must wait until OOC
+    end
     if CopyChat.Frame then return CopyChat.Frame end
 
     local frame = CreateFrame("Frame", "LoudmouthCopyChatFrame", UIParent, "BackdropTemplate")
     frame:SetSize(640, 460)
     frame:SetPoint("CENTER")
     frame:SetFrameStrata("DIALOG")
-    frame:SetBackdrop({
-        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
-        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
-        tile = true, tileSize = 32, edgeSize = 32,
-        centerSized = true,
-    })
+
+    -- Classic-Era safety: the BackdropTemplate mixin (which provides SetBackdrop)
+    -- is not always present on the frame at creation time. Mix it in explicitly
+    -- if the method is missing, then apply the backdrop.
+    if not frame.SetBackdrop and BackdropTemplateMixin then
+        Mixin(frame, BackdropTemplateMixin)
+        if frame.OnBackdropLoaded then
+            frame:OnBackdropLoaded()
+        end
+    end
+    if frame.SetBackdrop then
+        frame:SetBackdrop({
+            bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+            edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+            tile = true, tileSize = 32, edgeSize = 32,
+            centerSized = true,
+        })
+    end
     frame:SetMovable(true)
     frame:EnableMouse(true)
     frame:RegisterForDrag("LeftButton")
@@ -225,6 +240,7 @@ end
 --------------------------------------------------------------------------------
 
 function CopyChat.Show()
+    if InCombatLockdown() then return end
     BuildFrame()
     Populate()
     CopyChat.Frame:Show()
@@ -232,6 +248,7 @@ function CopyChat.Show()
 end
 
 function CopyChat.Toggle()
+    if InCombatLockdown() then return end
     BuildFrame()
     if CopyChat.Frame:IsShown() then
         CopyChat.Frame:Hide()

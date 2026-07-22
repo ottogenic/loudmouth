@@ -1,7 +1,7 @@
 Loudmouth = Loudmouth or {}
-Loudmouth.Personalities = Loudmouth.Personalities or {}
+Loudmouth._RawPersonalities = Loudmouth._RawPersonalities or {}
 
-Loudmouth.Personalities["DwarfFemaleHunterQuirky"] = {
+Loudmouth._RawPersonalities["DwarfFemaleHunterQuirky"] = {
     actions = {
         ["Auto Shot"] = {
             weight = 1/300,
@@ -85,6 +85,7 @@ Loudmouth.Personalities["DwarfFemaleHunterQuirky"] = {
             }
         }
     },
+
     zones = {
         ["Dun Modir"] = {
             lines = {
