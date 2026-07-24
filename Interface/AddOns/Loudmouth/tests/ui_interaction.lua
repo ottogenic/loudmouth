@@ -106,6 +106,41 @@ test("likes/hates helpers match zone and target context", function()
     assertEquals("Gnome like line", line)
 end)
 
+test("healing items do not inspect the target unit", function()
+    local savedCurrent = Loudmouth.CurrentPersonality
+    local savedPersonalities = Loudmouth.Personalities
+    local savedPending = Loudmouth.PendingZoneComment
+    local savedCooldowns = Loudmouth.Cooldowns
+    local savedGetTargetBanter = Loudmouth.GetTargetBanter
+    local inspectedTarget = false
+
+    Loudmouth.CurrentPersonality = "TestHealer"
+    Loudmouth.Personalities = {
+        TestHealer = {
+            actions = {
+                ["Healing Items"] = { weight = 1, lines = { "Heal" } },
+                ["Generic"] = { weight = 1, lines = { "Generic" } },
+            },
+        },
+    }
+    Loudmouth.PendingZoneComment = false
+    Loudmouth.Cooldowns = {}
+    Loudmouth.GetTargetBanter = function(_, targetUnit)
+        inspectedTarget = targetUnit ~= nil
+        return nil
+    end
+
+    Loudmouth.Trigger("Healing Items")
+
+    assertFalse(inspectedTarget)
+
+    Loudmouth.CurrentPersonality = savedCurrent
+    Loudmouth.Personalities = savedPersonalities
+    Loudmouth.PendingZoneComment = savedPending
+    Loudmouth.Cooldowns = savedCooldowns
+    Loudmouth.GetTargetBanter = savedGetTargetBanter
+end)
+
 test("likes/hates override broader zone substring matches", function()
     local personality = {
         zones = {
@@ -134,6 +169,30 @@ test("broader zone substring matches still beat subzone keywords", function()
 
     local line = Loudmouth.GetZoneBanterFromTexts(personality, "Ironforge", "The Commons")
     assertEquals("City line", line)
+end)
+
+test("subzone keywords only match the actual subzone text", function()
+    local personality = {
+        subzones = {
+            Camp = { lines = { "Subzone line" } },
+        },
+    }
+
+    local line = Loudmouth.GetZoneBanterFromTexts(personality, "Camp Narache", "")
+    assertNil(line)
+end)
+
+test("legacy nested zones.subzones layout still works", function()
+    local personality = {
+        zones = {
+            subzones = {
+                Commons = { lines = { "Legacy subzone line" } },
+            },
+        },
+    }
+
+    local line = Loudmouth.GetZoneBanterFromTexts(personality, "The Barrens", "The Commons")
+    assertEquals("Legacy subzone line", line)
 end)
 
 test("target-aware macro body passes target to Loudmouth.Trigger", function()

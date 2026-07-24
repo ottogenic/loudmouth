@@ -162,6 +162,22 @@ local function FindKeywordMatch(bucket, texts)
     end
 end
 
+local function GetPersonalitySubzones(personality)
+    if type(personality) ~= "table" then
+        return nil
+    end
+
+    if type(personality.subzones) == "table" then
+        return personality.subzones
+    end
+
+    if type(personality.zones) == "table" and type(personality.zones.subzones) == "table" then
+        return personality.zones.subzones
+    end
+
+    return nil
+end
+
 function Loudmouth.GetZoneBanterFromTexts(personality, realZone, subZone)
     if type(personality) ~= "table" then
         return nil
@@ -229,9 +245,10 @@ function Loudmouth.GetZoneBanterFromTexts(personality, realZone, subZone)
         end
     end
 
-    -- Explicit subzone keywords.
-    if type(personality.subzones) == "table" then
-        local subzoneLine, subzoneKey = FindKeywordMatch(personality.subzones, { zoneText, subText })
+    -- Explicit subzone keywords. Search the actual subzone text only.
+    local subzones = GetPersonalitySubzones(personality)
+    if type(subzones) == "table" then
+        local subzoneLine, subzoneKey = FindKeywordMatch(subzones, { subText })
         if subzoneLine then
             return subzoneLine, "subzone", subzoneKey
         end
@@ -253,6 +270,10 @@ function Loudmouth.GetEntityTexts(targetUnit)
             end
         end
         add(targetUnit.name)
+        return texts
+    end
+
+    if targetUnit == nil then
         return texts
     end
 
