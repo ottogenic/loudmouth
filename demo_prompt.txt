@@ -1,0 +1,13 @@
+I'd like you to expand our current feature set. We had planned a feature for personality to interact with targets in the world. Please compare to our PRD, but I'd like to see every personality with some traits like:
+ - Likes: Places, Entities
+ - Hates: Places, Entities
+
+This should influence banter from the character, for example:
+ - Likes: Lakes, Gnomes 
+ - Hates: Ironforge, Dwarfs
+
+Banter/comments examples:
+ - When entering Ironforge "Smells like feet and malt liqour... Dwarfs are disgusting."
+ - When casting Shadowbolt @ Dark Iron Dwarf "I hope this burns the hair of your ugly dwarf feet!"
+ - When entering a zone/subzone containing "Lake" "Ohhh, the water is so pretty! Wonder if we can get a boat ride?"
+ - When casting Shadowbold @ Leper Gnome "Gnomes are adorable!" 
