@@ -105,5 +105,39 @@ Loudmouth._RawPersonalities["DwarfFemaleHunterQuirky"] = {
                 "Fresh air and fresh prey!",
             }
         },
+    },
+
+    likes = {
+        places = {
+            ["Lake"] = {
+                lines = {
+                    "Ohhh, the water is so pretty! Wonder if we can get a boat ride?",
+                },
+            },
+        },
+        entities = {
+            ["Gnome"] = {
+                lines = {
+                    "Gnomes are adorable!",
+                },
+            },
+        },
+    },
+
+    hates = {
+        places = {
+            ["Ironforge"] = {
+                lines = {
+                    "Smells like feet and malt liqour... Dwarfs are disgusting.",
+                },
+            },
+        },
+        entities = {
+            ["Dwarf"] = {
+                lines = {
+                    "I hope this burns the hair of your ugly dwarf feet!",
+                },
+            },
+        },
     }
 }

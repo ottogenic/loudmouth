@@ -72,3 +72,72 @@ test("Close button hides the panel", function()
 
     LoudmouthConfigFrame:Show() -- leave it visible for any later render checks
 end)
+
+test("likes/hates helpers match zone and target context", function()
+    local personality = {
+        likes = {
+            places = {
+                Lake = { lines = { "Lake like line" } },
+            },
+            entities = {
+                Gnome = { lines = { "Gnome like line" } },
+            },
+        },
+        hates = {
+            places = {
+                Ironforge = { lines = { "Ironforge hate line" } },
+            },
+            entities = {
+                Dwarf = { lines = { "Dwarf hate line" } },
+            },
+        },
+    }
+
+    local line = Loudmouth.GetZoneBanterFromTexts(personality, "Ironforge", "")
+    assertEquals("Ironforge hate line", line)
+
+    line = Loudmouth.GetZoneBanterFromTexts(personality, "The Great Sea", "Lake Shore")
+    assertEquals("Lake like line", line)
+
+    line = Loudmouth.GetTargetBanter(personality, { name = "Dark Iron Dwarf" })
+    assertEquals("Dwarf hate line", line)
+
+    line = Loudmouth.GetTargetBanter(personality, { name = "Leper Gnome" })
+    assertEquals("Gnome like line", line)
+end)
+
+test("likes/hates override broader zone substring matches", function()
+    local personality = {
+        zones = {
+            ["City of Ironforge"] = { lines = { "City line" } },
+        },
+        hates = {
+            places = {
+                Ironforge = { lines = { "Ironforge hate line" } },
+            },
+        },
+    }
+
+    local line = Loudmouth.GetZoneBanterFromTexts(personality, "Ironforge", "")
+    assertEquals("Ironforge hate line", line)
+end)
+
+test("broader zone substring matches still beat subzone keywords", function()
+    local personality = {
+        zones = {
+            ["City of Ironforge"] = { lines = { "City line" } },
+        },
+        subzones = {
+            ["The Commons"] = { lines = { "Subzone line" } },
+        },
+    }
+
+    local line = Loudmouth.GetZoneBanterFromTexts(personality, "Ironforge", "The Commons")
+    assertEquals("City line", line)
+end)
+
+test("target-aware macro body passes target to Loudmouth.Trigger", function()
+    local body = Loudmouth.BuildMacroBody("Shadow Bolt", "Shadow Bolt")
+    assertNotNil(body)
+    assertTrue(string.find(body, 'Loudmouth.Trigger("Shadow Bolt", "target")', 1, true) ~= nil)
+end)

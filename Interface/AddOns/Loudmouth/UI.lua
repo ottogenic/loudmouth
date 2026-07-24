@@ -5,6 +5,24 @@
 -- Uses canonical action order from Loudmouth.ActionOrderByClass
 -- ============================================================================
 
+function Loudmouth.BuildMacroBody(actionKey, spellName)
+    if actionKey == "Healing Items" then
+        local healSeq =
+            "#showtooltip\n"
+            .. "/castsequence reset=combat item:5512,item:5511,item:5509,item:5510,item:9421\n"
+            .. "/run Loudmouth.Trigger(\"%s\")"
+        return string.format(healSeq, actionKey)
+    end
+
+    if spellName then
+        return string.format(
+            "/run Loudmouth.Trigger(\"%s\", \"target\")\n/cast %s",
+            actionKey, spellName)
+    end
+
+    return nil
+end
+
 function Loudmouth.GenerateMacros()
     -- Resolve player class to canonical action order
     local _, classFile = UnitClass("player")
@@ -109,20 +127,14 @@ function Loudmouth.GenerateMacros()
 
         -- Handle "Healing Items" specially: not a real spell, use pre-built body
         if actionKey == "Healing Items" then
-            local healSeq =
-                "#showtooltip\n"
-                .. "/castsequence reset=combat item:5512,item:5511,item:5509,item:5510,item:9421\n"
-                .. "/run Loudmouth.Trigger(\"%s\")"
-            body = string.format(healSeq, actionKey)
+            body = Loudmouth.BuildMacroBody(actionKey)
         else
             -- Resolve spell info via alias map
             local spellName = Loudmouth._ResolveSpellName(actionKey)
             if spellName then
                 local _, _, spellIcon = GetSpellInfo(spellName)
                 icon = spellIcon or 134400
-                body = string.format(
-                    "/run Loudmouth.Trigger(\"%s\")\n/cast %s",
-                    actionKey, spellName)
+                body = Loudmouth.BuildMacroBody(actionKey, spellName)
             else
                 -- Spell not found — mark for deletion (old macro may contain
                 -- a different class's spell) and skip creation.

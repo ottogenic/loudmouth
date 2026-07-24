@@ -110,6 +110,205 @@ Loudmouth.ZoneAliases = Loudmouth.ZoneAliases or {
 }
 
 -- ============================================================================
+-- Context matching helpers — shared by zone and entity banter
+-- ============================================================================
+
+local function NormalizeContextText(value)
+    return string.lower(tostring(value or ""))
+end
+
+local function CollectSortedKeys(bucket)
+    local keys = {}
+    for key in pairs(bucket or {}) do
+        keys[#keys + 1] = key
+    end
+    table.sort(keys, function(a, b)
+        return #tostring(a) > #tostring(b)
+    end)
+    return keys
+end
+
+local function PickEntryLine(entry)
+    local lines = entry
+    if type(entry) == "table" and entry.lines then
+        lines = entry.lines
+    end
+    if type(lines) ~= "table" or #lines == 0 then
+        return nil
+    end
+    return lines[math.random(#lines)]
+end
+
+local function FindKeywordMatch(bucket, texts)
+    if type(bucket) ~= "table" then
+        return nil
+    end
+
+    local candidates = {}
+    for _, key in ipairs(CollectSortedKeys(bucket)) do
+        local needle = NormalizeContextText(key)
+        for _, text in ipairs(texts or {}) do
+            local haystack = NormalizeContextText(text)
+            if haystack ~= "" and string.find(haystack, needle, 1, true) then
+                candidates[#candidates + 1] = { key = key, entry = bucket[key] }
+                break
+            end
+        end
+    end
+
+    if #candidates > 0 then
+        local winner = candidates[1]
+        return PickEntryLine(winner.entry), winner.key
+    end
+end
+
+function Loudmouth.GetZoneBanterFromTexts(personality, realZone, subZone)
+    if type(personality) ~= "table" then
+        return nil
+    end
+
+    local zoneText = realZone or ""
+    local subText = subZone or ""
+
+    -- Exact / alias zone table lookup.
+    if type(personality.zones) == "table" then
+        local exactEntry = personality.zones[realZone]
+        if exactEntry then
+            local line = PickEntryLine(exactEntry)
+            if line then
+                return line, "zone", realZone
+            end
+        end
+
+        for zoneName, aliases in pairs(Loudmouth.ZoneAliases or {}) do
+            local entry = personality.zones[zoneName]
+            if entry then
+                for _, alias in ipairs(aliases) do
+                    if NormalizeContextText(zoneText) == NormalizeContextText(alias) then
+                        local line = PickEntryLine(entry)
+                        if line then
+                            return line, "zone", zoneName
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    -- Like/hate place keywords.
+    local hatePlaces = personality.hates and personality.hates.places
+    local likePlaces = personality.likes and personality.likes.places
+    local line, key = FindKeywordMatch(hatePlaces, { zoneText, subText })
+    if line then
+        return line, "hate-place", key
+    end
+    line, key = FindKeywordMatch(likePlaces, { zoneText, subText })
+    if line then
+        return line, "like-place", key
+    end
+
+    -- Substring zone table lookup stays before subzones to preserve the
+    -- existing major-zone precedence while still letting likes/hates win.
+    if type(personality.zones) == "table" then
+        local sortedKeys = CollectSortedKeys(personality.zones)
+        for _, zoneName in ipairs(sortedKeys) do
+            local entry = personality.zones[zoneName]
+            if type(entry) == "table" and type(entry.lines) == "table" and #entry.lines > 0 then
+                local zoneNeedle = NormalizeContextText(zoneName)
+                local haystack = NormalizeContextText(zoneText)
+                if haystack ~= "" and (
+                    string.find(haystack, zoneNeedle, 1, true) or
+                    string.find(zoneNeedle, haystack, 1, true)
+                ) then
+                    local zoneLine = PickEntryLine(entry)
+                    if zoneLine then
+                        return zoneLine, "zone", zoneName
+                    end
+                end
+            end
+        end
+    end
+
+    -- Explicit subzone keywords.
+    if type(personality.subzones) == "table" then
+        local subzoneLine, subzoneKey = FindKeywordMatch(personality.subzones, { zoneText, subText })
+        if subzoneLine then
+            return subzoneLine, "subzone", subzoneKey
+        end
+    end
+end
+
+function Loudmouth.GetEntityTexts(targetUnit)
+    local texts = {}
+    local function add(value)
+        if value and value ~= "" then
+            texts[#texts + 1] = tostring(value)
+        end
+    end
+
+    if type(targetUnit) == "table" then
+        if type(targetUnit.texts) == "table" then
+            for _, value in ipairs(targetUnit.texts) do
+                add(value)
+            end
+        end
+        add(targetUnit.name)
+        return texts
+    end
+
+    local unit = targetUnit or "target"
+    if type(unit) ~= "string" then
+        unit = "target"
+    end
+
+    if UnitExists and not UnitExists(unit) then
+        return texts
+    end
+
+    if UnitName then
+        add(UnitName(unit))
+    end
+    if UnitCreatureType then
+        add(UnitCreatureType(unit))
+    end
+    if UnitRace then
+        local raceName, raceFile = UnitRace(unit)
+        add(raceName)
+        add(raceFile)
+    end
+    if UnitClass then
+        local className, classFile = UnitClass(unit)
+        add(className)
+        add(classFile)
+    end
+
+    return texts
+end
+
+function Loudmouth.GetEntityBanterFromTexts(personality, texts)
+    if type(personality) ~= "table" then
+        return nil
+    end
+
+    local hateEntities = personality.hates and personality.hates.entities
+    local likeEntities = personality.likes and personality.likes.entities
+
+    local line, key = FindKeywordMatch(hateEntities, texts)
+    if line then
+        return line, "hate-entity", key
+    end
+
+    line, key = FindKeywordMatch(likeEntities, texts)
+    if line then
+        return line, "like-entity", key
+    end
+end
+
+function Loudmouth.GetTargetBanter(personality, targetUnit)
+    return Loudmouth.GetEntityBanterFromTexts(personality, Loudmouth.GetEntityTexts(targetUnit))
+end
+
+-- ============================================================================
 -- Spell name resolver — handles locale/alias mismatches for GetSpellInfo
 -- ============================================================================
 
@@ -307,7 +506,7 @@ local function SafeSendChat(msg, chatType)
     SendChatMessage(msg, chatType or "SAY")
 end
 
-function Loudmouth.Trigger(action)
+function Loudmouth.Trigger(action, targetUnit)
     -- ========================================================================
     -- Localization Strategy (English-first)
     -- This addon targets English locales (enUS, enGB) for zone matching.
@@ -359,79 +558,20 @@ function Loudmouth.Trigger(action)
     -- ========================================================================
     -- Pending Zone Comment — resolve on first macro call after ZONE_CHANGED_NEW_AREA
     -- When PendingZoneComment is true we IGNORE the action weight and force a
-    -- 100% zone comment.
+    -- 100% zone/subzone/likes/hates place comment.
     -- ========================================================================
     if Loudmouth.PendingZoneComment then
         local realZone = GetRealZoneText()
         local subZone = GetSubZoneText() or ""
 
-        local matchedEntry = nil
-
-        -- 1. Try exact match against realZone
-        if personality.zones and personality.zones[realZone] then
-            matchedEntry = personality.zones[realZone]
-        elseif personality.zones then
-            -- 2. Alias check: does realZone match any known alias for a zone key?
-            for zoneName, aliases in pairs(Loudmouth.ZoneAliases or {}) do
-                if personality.zones[zoneName] then
-                    for _, alias in ipairs(aliases) do
-                        if string.lower(realZone) == string.lower(alias) then
-                            matchedEntry = personality.zones[zoneName]
-                            break
-                        end
-                    end
-                    if matchedEntry then break end
-                end
-            end
-
-            -- 3. Fallback: sorted substring search (longest keys first to avoid
-            --    short-word false positives like "Camp" matching "Raven Hill Camp")
-            if not matchedEntry then
-                local sortedKeys = {}
-                for zoneName in pairs(personality.zones) do
-                    sortedKeys[#sortedKeys + 1] = zoneName
-                end
-                table.sort(sortedKeys, function(a, b) return #a > #b end)
-
-                for _, zoneName in ipairs(sortedKeys) do
-                    local data = personality.zones[zoneName]
-                    if type(data.lines) == "table" and #data.lines > 0 then
-                        if string.find(string.lower(realZone), string.lower(zoneName), 1, true) or
-                           string.find(string.lower(zoneName), string.lower(realZone), 1, true) then
-                            matchedEntry = data
-                            break
-                        end
-                    end
-                end
-            end
-        end
-
-        -- 4. Subzone keyword matching (Fix 3: use personality.subzones, not personality.zones.subzones)
-        local subMatchEntry = nil
-        if not matchedEntry and subZone ~= "" then
-            local subData = personality.subzones or (personality.zones and personality.zones.subzones)
-            if subData then
-                for keyword, data in pairs(subData) do
-                    if string.find(string.lower(subZone), string.lower(keyword), 1, true) then
-                        subMatchEntry = data
-                        break
-                    end
-                end
-            end
-        end
-
+        local line = Loudmouth.GetZoneBanterFromTexts(personality, realZone, subZone)
         local played = false
-        if matchedEntry and matchedEntry.lines and #matchedEntry.lines > 0 then
-            local line = matchedEntry.lines[math.random(#matchedEntry.lines)]
-            SafeSendChat(line, "SAY")
-            played = true
-        elseif subMatchEntry and subMatchEntry.lines and #subMatchEntry.lines > 0 then
-            local line = subMatchEntry.lines[math.random(#subMatchEntry.lines)]
+        if line then
             SafeSendChat(line, "SAY")
             played = true
         end
 
-        if not matchedEntry and not subMatchEntry and Loudmouth.ShowZoneDebug then
+        if not line and Loudmouth.ShowZoneDebug then
             print(string.format(
                 "|cFFFF8800[Dev Alert]|r Missing zone data for '%s' (sub: '%s'). Please add entries!",
                 realZone, subZone
@@ -445,6 +585,13 @@ function Loudmouth.Trigger(action)
 
         -- No comment was found, but we still consumed the pending flag.
         Loudmouth.PendingZoneComment = false
+    end
+
+    local targetLine = Loudmouth.GetTargetBanter(personality, targetUnit)
+    if targetLine then
+        SafeSendChat(targetLine, "SAY")
+        Loudmouth.Cooldowns[action] = now
+        return
     end
 
     local actionData = personality.actions[action]

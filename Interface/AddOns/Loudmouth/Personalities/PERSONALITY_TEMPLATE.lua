@@ -105,6 +105,43 @@ Loudmouth._RawPersonalities["<Race><Gender><Class><Variant>"] = {
         --     },
         -- },
     },
+
+    -- ==================================================================
+    -- LIKES / HATES TABLES
+    -- ==================================================================
+    likes = {
+        places = {
+            -- ["Lake"] = {
+            --     lines = {
+            --         "Ohhh, the water is so pretty! Wonder if we can get a boat ride?",
+            --     },
+            -- },
+        },
+        entities = {
+            -- ["Gnome"] = {
+            --     lines = {
+            --         "Gnomes are adorable!",
+            --     },
+            -- },
+        },
+    },
+
+    hates = {
+        places = {
+            -- ["Ironforge"] = {
+            --     lines = {
+            --         "Smells like feet and malt liqour... Dwarfs are disgusting.",
+            --     },
+            -- },
+        },
+        entities = {
+            -- ["Dwarf"] = {
+            --     lines = {
+            --         "I hope this burns the hair of your ugly dwarf feet!",
+            --     },
+            -- },
+        },
+    },
 }
 
 -- ============================================================================
@@ -133,10 +170,15 @@ Loudmouth._RawPersonalities["<Race><Gender><Class><Variant>"] = {
 --      succeeds, a random line from `lines` is sent to chat.
 --      If the action is not found, it falls back to `actions["Generic"]`.
 --
-    --   5. COOLDOWN CHECK
+--   5. COOLDOWN CHECK
 --      Each action has its own per-action cooldown (Loudmouth.CooldownTime,
 --      default 5 seconds).  If the action was triggered recently, the
 --      entire chain is skipped for that action.
+
+--   6. LIKES / HATES CONTEXT
+--      Optional `likes` and `hates` tables can add place/entity reactions.
+--      Each table may contain `places` and `entities` subtables keyed by a
+--      keyword with a `lines` array.
 --
 -- DESIGN NOTE:
 --   Keep action weights low (e.g. 1/100 to 1/500) for combat spells so
