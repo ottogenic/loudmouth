@@ -41,6 +41,7 @@ STYLES = {
     "d": "\x1b[2m",
     "i": "\x1b[3m",
     "u": "\x1b[4m",
+    "strike": "\x1b[9m",
     "red": "\x1b[38;5;203m",
     "gold": "\x1b[38;5;220m",
     "white": "\x1b[97m",
@@ -194,9 +195,6 @@ def A(*lines):
 
 
 def slide_title():
-    def bell(left):  # pad to the bell's right edge so every '|' lines up
-        return padline(left, 44) + "[red]|[/]"
-
     return [
         "[grey]I  N  T  R  O  D  U  C  I  N  G[/]",
         "",
@@ -205,14 +203,15 @@ def slide_title():
         "[grey]a World of Warcraft Classic Era (Hardcore) addon[/]",
         "",
         A(
-            "                     [red]_________________________[/]",
-            bell("    _________       [red]/[/]") + "      [gold]) ) )[/]",
-            bell("   |  [steel]‖ ‖ ‖[/]  |_____[red]/[/]     [red]▟█████████▙[/]"),
-            bell("   |  [steel]‖ ‖ ‖[/]  |     |     [red]█[/] [white]▀▀▀▀▀▀▀[/] [red]█[/]") + "    [gold])) )) ))[/]",
-            bell("   |  [grey](o o)[/]  |_____|     [red]█[/] [white]▄▄▄▄▄▄▄[/] [red]█[/]"),
-            bell("   |_________|     [red]\\[/]     [red]▜█████████▛[/]") + "      [gold]) ) )[/]",
-            "                     [red]\\________________________|[/]",
-            "                             [white]red lips  ·  white teeth[/]",
+            "   [grey]╭────────────────────────────────────╮[/]",
+            "   [grey]│[/]  [gold][b]HOW YOU LIKE ME NOW, CHINSTRAP?![/][/]  [grey]│[/]",
+            "   [grey]╰─────────────────[grey]┬[/][grey]──────────────────╯[/]",
+            "                     [grey]│[/]",
+            "              [red]▟█████████████▙[/]",
+            "              [red]█[/] [white]▀▀▀▀▀▀▀▀▀▀▀[/] [red]█[/]",
+            "              [red]█[/]             [red]█[/]   [gold]) ) )[/]",
+            "              [red]█[/] [white]▄▄▄▄▄▄▄▄▄▄▄[/] [red]█[/]",
+            "              [red]▜█████████████▛[/]",
         ),
     ]
 
@@ -222,29 +221,22 @@ def slide_what():
         "[gold][b]WHAT IT IS[/][/]",
         "",
         "[white]Personality-driven, context-aware banter.[/]",
-        "[grey]a silent avatar starts talking -- reacting to spells, pets, and zones[/]",
+        "[grey]reacting to spells, pets, mobs, and zones[/]",
         "",
         A(
-            *box(
-                [
-                    "  [cyan]Oooof... smells like malt liquor and[/]",
-                    "  [cyan]feed... Dwarfs are nasty.[/]",
-                ],
-                iw=42,
-                color="grey",
-                lead="   ",
-            )
-        ),
-        A(
-            "                            [grey]\\|[/]",
-            "         [purple]/\\[/]                   [steel]__[/]          [steel]I R O N F O R G E[/]",
-            "        [purple]/  \\[/]               [steel].-'  '-.[/]",
-            "       [purple]/____\\[/]             [steel]/[/]  [gold](( * ))[/]  [steel]\\[/]",
-            "       [white]([/][gold]o[/] [gold]o[/][white])[/]             [steel]|[/]    [gold]|   |[/]    [steel]|[/]",
-            "      [purple]<[/]  [gold]||[/]  [purple]>[/]            [steel]|[/]  [gold]__|   |__[/]  [steel]|[/]",
-            "       [purple]/_[/][gold]||[/][purple]_\\[/]             [steel]|_|[/]   [gold]‖[/]   [steel]|_|[/]",
-            "         [gold]||[/]                [steel]▐███████████▌[/]",
-            "        [purple]_[/][gold]||[/][purple]_[/]               [steel]▐██ ▐█▌ ▐█▌ ██▌[/]",
+            "     [grey]╭──────────────────────────────────────╮[/]",
+            "     [grey]│[/]  [cyan]Oooof... smells like malt liquor[/]    [grey]│[/]",
+            "     [grey]│[/]  [cyan]and feet... Dwarfs are nasty.[/]       [grey]│[/]",
+            "     [grey]╰──[grey]┬[/]───────────────────────────────────╯[/]",
+            "        [grey]│[/]",
+            "        [purple]/\\[/]",
+            "       [purple]/  \\[/]              [gold] __________________[/]",
+            "      [purple]/____\\[/]             [gold]|[/]                  [gold]\\[/]",
+            "      [white]([/][gold]o  o[/][white])[/]             [gold]|[/]   [b][cyan]IRONFORGE[/][/]      [gold]▶[/]",
+            "     [purple]<[/]  [gold]||[/]  [purple]>[/]            [gold]|__________________/[/]",
+            "      [purple]/_[/][gold]||[/][purple]_\\[/]                   [gold]|[/]",
+            "        [gold]||[/]                     [gold]|[/]",
+            "       [purple]_[/][gold]||[/][purple]_[/]",
         ),
     ]
 
@@ -252,58 +244,63 @@ def slide_what():
 def slide_spark():
     return [
         "[gold][b]THE DGX SPARK[/][/]",
-        "[grey]GB10 Grace-Blackwell  ·  sm_121  ·  aarch64[/]",
+        "",
         "",
         A(
             *box(
                 [
                     "",
-                    "   [blue]┌──────────┐[/]      [green]┌──────────┐[/]",
-                    "   [blue]│[/]  [b]ARM64[/]   [blue]│[/]      [green]│[/]   [b]GPU[/]    [green]│[/]",
-                    "   [blue]│[/] [grey]20 cores[/] [blue]│[/]      [green]│[/][grey]Blackwell [/][green]│[/]",
-                    "   [blue]└──────────┘[/]      [green]└──────────┘[/]",
-                    "   [gold]┌──────────────────────────────┐[/]",
-                    "   [gold]│[/]   [b]128 GB LPDDR5X[/]  [grey]· unified[/]  [gold]│[/]",
-                    "   [gold]└──────────────────────────────┘[/]",
+                    "      [blue]┌───────┐[/]                [green]┌───────┐[/]",
+                    "      [blue]│ [b]ARM64[/] [blue]│[/][purple]══ NVLink-C2C ══[/][green]│  [b]GPU[/]  [green]│[/]",
+                    "      [blue]└───[grey]┬[/][blue]───┘[/]                [green]└───[grey]┬[/][green]───┘[/]",
+                    "          [grey]└───────────┬────────────┘[/]",
+                    "      [gold]┌───────────────┴────────────────┐[/]",
+                    "      [gold]│[/]    [white][b]128 GB LPDDR5X[/][/][grey] · unified[/]    [gold]│[/]",
+                    "      [gold]└────────────────────────────────┘[/]",
                     "",
                 ],
-                iw=44,
+                iw=46,
                 color="steel",
-                title="DGX SPARK",
+                title="GB10 SUPERCHIP",
             )
         ),
         "",
         A(
-            "  [grey]•[/]  CPU + GPU [white]share[/] one 128 GB pool [grey]-- no host<->device copies[/]",
-            "  [grey]•[/]  [white]~273 GB/s[/] memory bandwidth [grey]-- decode is bandwidth-bound[/]",
-            "  [grey]•[/]  one box = [white]TP=1[/]; link two over 200GbE for [white]~405B[/] models",
+            "   [b][green]GPU[/][/]   [white]Blackwell[/] [grey]architecture · 5th-gen Tensor Cores[/]",
+            "   [b][blue]CPU[/][/]   [white]20-core Arm64[/] [grey](Grace) · 10× X925 + 10× A725[/]",
+            "   [b][gold]RAM[/][/]   [white]128 GB LPDDR5X[/] [grey]· unified · ~273 GB/s[/]",
+            "   [b][cyan]AI[/][/]    [white]~1 PFLOP[/] [grey](1000 TFLOPS) at FP4[/]",
         ),
         "",
-        "[green][b]Run AI models locally, for free[/][/][green]*[/]      [grey]([red]* $5,000[/][grey])[/]",
+        "[green][b]Run AI models locally, for free[/][/][green]*[/]      [grey]([red]$5,000[/][grey])[/]",
     ]
 
 
 def slide_harness():
     return [
         "[gold][b]THE AGENT HARNESS[/][/]",
-        "[grey]what omodel-manager configures for Loom[/]",
+        "[grey]what omodel-wire configures for opencode[/]",
         "",
         A(
-            "     [blue]┌────────────┐[/]       [purple]┌──────────────────────┐[/]",
-            "     [blue]│[/] [b]Lead Agent[/] [blue]│[/] [grey]───▶[/]  [purple]│[/] [b]Python State Machine[/] [purple]│[/]",
-            "     [blue]└────────────┘[/]       [purple]└──────────┬───────────┘[/]",
-            "                                     [grey]│[/] [grey]orchestrates[/]",
-            "                                     [grey]▼[/]",
-            "  [green]┌───────────┐[/]  [green]┌───────┐[/]  [green]┌──────┐[/]  [gold]┌──────────┐[/]",
-            "  [green]│[/] [b]Architect[/] [green]│─▶│[/] [b]Coder[/] [green]│─▶│[/] [b]Test[/] [green]│[/][gold]─▶│[/] [b]Reviewer[/] [gold]│[/]",
-            "  [green]└─────┬─────┘[/]  [green]└───┬───┘[/]  [green]└──────┘[/]  [gold]└──────────┘[/]",
-            "     [orange]↺ loop[/]        [orange]↺ loop[/]",
+            "          [blue]┌────────────┐[/]        [purple]┌──────────────────────┐[/]",
+            "          [blue]│ [b]Lead Agent[/] [blue]│[/][grey]───────▶[/][purple]│ [b]Python State Machine[/] [purple]│[/]",
+            "          [blue]│[/]   [steel]Qwen3[/]    [blue]│[/]        [purple]│[/]   [grey]no model needed[/]    [purple]│[/]",
+            "          [blue]└────────────┘[/]        [purple]└──────────[cyan]┬[/][purple]───────────┘[/]",
+            "             [cyan]┌───────────────┬─────────────┘[/]",
+            "             [cyan]▼[/]               [cyan]▼[/]",
+            "       [green]┌───────────┐[/]     [green]┌───────┐[/]     [gold]┌───────┐[/]     [gold]┌──────────┐[/]",
+            "       [green]│ [b]Architect[/] [green]│[/] [grey]──▶[/] [green]│ [b]Coder[/] [green]│[/] [grey]──▶[/] [gold]│ [b]Test[/]  [gold]│[/] [grey]──▶[/] [gold]│ [b]Reviewer[/] [gold]│[/]",
+            "       [green]│ [gold]Opus 4.8[/]  [green]│[/]     [green]│ [steel]Qwen3[/] [green]│[/]     [gold]│ [steel]Qwen3[/] [gold]│[/]     [gold]│ [gold]Opus 4.8[/] [gold]│[/]",
+            "       [green]└───────────┘[/]     [green]└───[orange]▲[/][green]───┘[/]     [gold]└───[orange]┬[/][gold]───┘[/]     [gold]└────[orange]┬[/][gold]─────┘[/]",
+            "                             [orange]│[/]             [orange]│[/]              [orange]│[/]",
+            "                             [orange]├─── test ────┘[/]              [orange]│[/]",
+            "                             [orange]└───────── reviewer ─────────┘[/]",
         ),
         "",
-        A(
-            "  [grey]Each stage is a subagent. The state machine drives the loops[/]",
-            "  [grey]until lint + headless UI render pass -- then the reviewer signs off.[/]",
-        ),
+        "[grey]The state machine enters at [b]architect[/][grey] or [b]coder[/][grey];[/]",
+        "[grey]test and reviewer loop back to [b]coder[/][grey] until the gates pass.[/]",
+        "",
+        "[gold][b]Match the size of the model to the size of the job.[/][/]",
     ]
 
 
@@ -334,28 +331,64 @@ def slide_solution():
         "[white][b]INHERITANCE[/][/]    [cyan]EXTEND[/][grey],[/] [orange]OVERRIDE[/]",
         "",
         A(
-            "  [grey]resolve a skill:[/]",
-            "     [orange][ override ][/]   [grey]──▶[/]   [cyan][ global[/] [grey]+[/] [cyan]local ][/]",
-            "     [grey]project skill[/]          [grey]base skill  +  overlay[/]",
-        ),
-        "",
-        A(
             *box(
                 [
-                    "",
-                    "  [i]\"Use this as an additive [cyan]overlay[/][i] on the[/]",
-                    "  [i]global agent-team skill. Do [b]not[/][i] weaken the[/]",
-                    "  [i]global scope-control, task-id reuse,[/]",
-                    "  [i]review, or finding-classification rules.\"[/]",
-                    "",
-                    "  [grey]— agent-team-extend/SKILL.md[/]",
+                    " [grey]Before the task, load your role skill:[/]",
+                    " [orange]1.[/] If [orange]agent-code-override[/] is available:",
+                    "    load [b]only[/] that skill. Skip [cyan]2[/][grey]-[/][green]3[/][grey].[/]",
+                    " [cyan]2.[/] Load [cyan]agent-code[/][grey].[/]",
+                    " [green]3.[/] If [green]agent-code-extend[/] is available: load",
+                    "    it too. If it conflicts, follow [cyan]agent-code[/][grey].[/]",
                 ],
                 iw=48,
                 color="steel",
+                title="the role-skill loader",
+                lead="",
             )
         ),
         "",
+        A(
+            "  [orange]override[/]   [grey]<repo>/.agents/skills/[/][orange]agent-code-override[/][grey]/[/]",
+            "  [cyan]global[/]     [grey]~/.config/opencode/skills/[/][cyan]agent-code[/][grey]/[/]",
+            "  [green]local[/]      [grey]<repo>/.agents/skills/[/][green]agent-code-extend[/][grey]/[/]",
+        ),
+        "",
         "[grey]The Lua expert was there all along -- one overlay away.[/]",
+    ]
+
+
+def slide_runbook():
+    return [
+        "[gold][b]THE agent-runbook-review SKILL[/][/]",
+        "[grey]\"perform an agent runbook review\"[/]",
+        "",
+        "[grey]a periodic self-maintenance pass over the repo's agent docs[/]",
+        "",
+        "[white]AGENTS.md[/] [grey]·[/] [white]REVIEW.md[/] [grey]·[/] [white].agents/skills/*[/] [grey]·[/] [white]session log [grey](sqlite)[/]",
+        "[grey]│[/]",
+        "[grey]▼[/]",
+        A(
+            *box(
+                ["  [b][cyan]RUNBOOK REVIEW[/][/]  "],
+                iw=18,
+                color="cyan",
+                lead="",
+            )
+        ),
+        "[grey]│[/]",
+        "[grey]▼[/]",
+        "[white]a Report:[/] [grey]proposed diffs  +  a change ledger[/]",
+        "[grey](report-first — never a silent rewrite)[/]",
+        "",
+        A(
+            "  [cyan]A[/]  [white]inventory & size skills[/]   [grey]≤40 lean · >80 LARGE[/]",
+            "  [cyan]B[/]  [white]compact & de-duplicate[/]    [grey]one rule, one home[/]",
+            "  [cyan]C[/]  [white]mine the session log[/]      [grey]recurring errors → notes[/]",
+            "  [cyan]D[/]  [white]new project skill?[/]        [grey]extend vs override[/]",
+            "  [cyan]E[/]  [white]draft any missing files[/]   [grey]AGENTS.md, REVIEW.md …[/]",
+        ),
+        "",
+        "[orange][b]Consolidation only[/][/][grey] — never drops a MUST / NEVER / invariant.[/]",
     ]
 
 
@@ -364,18 +397,12 @@ def slide_end():
         A(
             "[grey]─────────────────────────────────────────────[/]",
             "",
-            "   [white][b]\"No Adobe tokens were harmed in the[/][/]",
-            "   [white][b] creation of this mod / presentation.\"[/][/]",
+            "   [white][b]\"No Adobe tokens were [strike][grey]harmed[/][/] consumed in the[/][/]",
+            "   [white][b]  creation of this addon / presentation.\"[/][/]",
             "",
             "[grey]─────────────────────────────────────────────[/]",
         ),
         "",
-        "",
-        A(
-            "   [grey]rendered live in a stdlib Python TUI[/]",
-            "   [grey]models served on the [steel]DGX Spark[/] [grey]by [white]omodel-manager[/] [grey]·[/] [white]omodel-wire[/]",
-            "   [grey]banter by [red]Loudmouth[/]",
-        ),
         "",
         "[red][b]<3[/][/]   [gold]thank you[/]",
     ]
@@ -388,6 +415,7 @@ SLIDES = [
     slide_harness,
     slide_problem,
     slide_solution,
+    slide_runbook,
     slide_end,
 ]
 N = len(SLIDES)
@@ -409,30 +437,21 @@ def footer_line(index, cols):
 
 
 def _layout_block(entries):
-    """Flatten slide entries into equal-width span lines (the centered block)."""
-    parsed = []  # (centered?, spans)
+    """Flatten slide entries into span lines ready to be centered by compose().
+
+    A plain string is centered on its own. An Art block is padded to *its own*
+    width and centered as a single unit -- so a narrow diagram next to a wider
+    paragraph still lands in the middle instead of being shoved left."""
+    out = []
     for item in entries:
         if isinstance(item, Art):
-            for ln in item:
-                parsed.append((False, parse_markup(ln)))
+            parsed = [parse_markup(ln) for ln in item]
+            bw = max((plain_len(sp) for sp in parsed), default=0)
+            for sp in parsed:
+                pad = bw - plain_len(sp)
+                out.append(sp + ([("", " " * pad)] if pad else []))
         else:
-            parsed.append((True, parse_markup(item)))
-    block_w = max((plain_len(sp) for _, sp in parsed), default=1)
-    block_w = max(1, block_w)
-
-    out = []
-    for centered, sp in parsed:
-        w = plain_len(sp)
-        pad = block_w - w
-        if centered:
-            left = pad // 2
-            right = pad - left
-            line = ([("", " " * left)] if left else []) + sp
-            if right:
-                line = line + [("", " " * right)]
-        else:  # left-anchored: pad on the right only
-            line = sp + ([("", " " * pad)] if pad else [])
-        out.append(line)
+            out.append(parse_markup(item))  # compose() centers single lines
     return out
 
 
