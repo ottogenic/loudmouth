@@ -35,4 +35,6 @@ Use this as an additive overlay on the global `agent-code` skill.
 
 - Run `luacheck .` after code changes.
 - Run `./tests/ui-test.sh` after UI/core behavior changes.
-- Report exact PASS/FAIL output and changed files. Do not claim success from intent.
+- Put the exact command output (PASS/FAIL) and changed files (`path:line`) in your
+  **EVIDENCE**. Do not claim success from intent. (Reply format is owned by the global
+  `agent-code` Return Contract -- this overlay never restates or replaces it.)

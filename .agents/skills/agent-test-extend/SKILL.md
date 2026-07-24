@@ -6,8 +6,8 @@ description: Loudmouth's test + lint bar for agent-test. Load when running verif
 # Testing Loudmouth (agent-test)
 
 You own verification for this repo. Two gates: **lint** and **headless UI render**.
-Run both, report `PASS`/`FAIL` with the failing slice -- never hand the human raw
-commands to run themselves.
+Run both and surface the outcome (with the failing slice on fail) -- never hand the human
+raw commands to run themselves.
 
 ## 1. Lint
 - Run `luacheck .` from the repo root. `.luacheckrc` scopes it to
@@ -43,6 +43,8 @@ Button behaviour is covered by `run-tests Loudmouth` against
 It renders structure, not aesthetics. A clean render means "structurally sound," not
 "pixel-perfect" -- flag that the human still owns the final visual check.
 
-## Reporting contract
-Return to the lead: `PASS`/`FAIL`, the lint result, the harness `RESULT:` line, and
-(on fail) the smallest failing slice. Open a PR only if the lead explicitly asked.
+## Evidence to include
+In your **EVIDENCE**, quote the exact `luacheck` summary and the `ui-test.sh` `RESULT:`
+line -- and, on fail, the smallest failing slice. Open a PR only if the lead explicitly asked.
+(Reply format, incl. the mandatory `STATUS:` line, stays owned by the global Return Contract --
+this overlay never restates or replaces it.)
