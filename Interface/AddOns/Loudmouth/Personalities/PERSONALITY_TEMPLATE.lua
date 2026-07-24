@@ -105,6 +105,38 @@ Loudmouth._RawPersonalities["<Race><Gender><Class><Variant>"] = {
         --     },
         -- },
     },
+
+    -- ==================================================================
+    -- LIKES / HATES TABLES (trait-driven banter)
+    -- ==================================================================
+    -- These tables let the core engine fire tone-specific banter when the
+    -- player enters a matching place or targets a matching entity.
+    --
+    --   places   — array of zone/subzone keywords (substring matching)
+    --   entities — array of target race/class keywords
+    --
+    -- Entity entries may be plain names ("Dwarf", "Warlock") or prefixed
+    -- values ("race:Dwarf", "class:Warlock") if you want to be explicit.
+    -- ==================================================================
+    Likes = {
+        places = {
+            -- "Ironforge",
+        },
+        entities = {
+            -- "Dwarf",
+            -- "Hunter",
+        },
+    },
+
+    Hates = {
+        places = {
+            -- "Undercity",
+        },
+        entities = {
+            -- "Undead",
+            -- "Warlock",
+        },
+    },
 }
 
 -- ============================================================================
@@ -127,13 +159,17 @@ Loudmouth._RawPersonalities["<Race><Gender><Class><Variant>"] = {
 --      If GetSubZoneText() contains a key from `subzones`, a random subzone
 --      line is selected and spoken once for that location visit.
 --
---   4. ACTION ROLL
+--   4. LIKES / HATES TRAIT MATCH
+--      If the current zone/subzone or target matches a trait entry, the
+--      engine speaks a tone-specific trait line instead of a normal roll.
+--
+--   5. ACTION ROLL
 --      The engine looks up the action name in `actions[action]`.
 --      It rolls math.random() against actionData.weight.  If the roll
 --      succeeds, a random line from `lines` is sent to chat.
 --      If the action is not found, it falls back to `actions["Generic"]`.
 --
-    --   5. COOLDOWN CHECK
+--   6. COOLDOWN CHECK
 --      Each action has its own per-action cooldown (Loudmouth.CooldownTime,
 --      default 5 seconds).  If the action was triggered recently, the
 --      entire chain is skipped for that action.

@@ -319,6 +319,73 @@ local function InitUI()
     infoText:SetJustifyH("CENTER")
     infoText:Show()
 
+    local traitsLabel = Loudmouth.UIFrame:CreateFontString()
+    traitsLabel:SetFontObject("GameFontNormalSmall")
+    traitsLabel:SetPoint("TOPLEFT", infoText, "BOTTOMLEFT", 0, -ROW_GAP)
+    traitsLabel:SetText("Personality Traits")
+    traitsLabel:Show()
+
+    local traitsText = Loudmouth.UIFrame:CreateFontString()
+    traitsText:SetFontObject("GameFontHighlightSmall")
+    traitsText:SetPoint("TOPLEFT", traitsLabel, "BOTTOMLEFT", 0, -4)
+    traitsText:SetWidth(CONTENT_W)
+    traitsText:SetHeight(42)
+    traitsText:SetJustifyH("LEFT")
+    traitsText:SetJustifyV("TOP")
+    traitsText:SetWordWrap(true)
+    traitsText:SetNonSpaceWrap(true)
+    traitsText:Show()
+    Loudmouth.UIFrame.PersonalityPreview = traitsText
+
+    local dropdown, dropdownLabel
+    local traitsPreviewMinH = 42
+
+    local function UpdatePanelHeight()
+        if not dropdown or not dropdownLabel then
+            return
+        end
+
+        local titleH, infoH = 18, 14
+        local traitsLabelH = 12
+        local dropdownLabelH = math.ceil(dropdownLabel:GetStringHeight() or 12)
+        local dropdownH = dropdown:GetHeight() or 0
+        local traitsTextH = traitsText:GetHeight() or traitsPreviewMinH
+        local contentH = PAD + titleH + ROW_GAP + infoH + ROW_GAP + traitsLabelH + 4 + traitsTextH
+            + (ROW_GAP + 14) + math.max(dropdownLabelH - 3, 0) + dropdownH
+            + (ROW_GAP + 6) + (BUTTON_H * 4) + (ROW_GAP * 3) + PAD
+
+        Loudmouth.UIFrame:SetHeight(contentH)
+    end
+
+    local function FormatTraitValues(values)
+        if type(values) ~= "table" or #values == 0 then
+            return "None"
+        end
+        return table.concat(values, ", ")
+    end
+
+    local function UpdateTraitsPreview()
+        local personality = Loudmouth.CurrentPersonality and Loudmouth.Personalities[Loudmouth.CurrentPersonality]
+        if not personality then
+            traitsText:SetText("Likes: None\nHates: None")
+            return
+        end
+
+        local likes = personality.Likes or {}
+        local hates = personality.Hates or {}
+        traitsText:SetText(string.format(
+            "Likes — Places: %s | Entities: %s\nHates — Places: %s | Entities: %s",
+            FormatTraitValues(likes.places),
+            FormatTraitValues(likes.entities),
+            FormatTraitValues(hates.places),
+            FormatTraitValues(hates.entities)
+        ))
+
+        local previewH = math.max(traitsPreviewMinH, math.ceil(traitsText:GetStringHeight() or traitsPreviewMinH))
+        traitsText:SetHeight(previewH)
+        UpdatePanelHeight()
+    end
+
     local function UpdatePlayerInfo()
         local race = Loudmouth.GetRace()
         local class = Loudmouth.GetClass()
@@ -327,13 +394,13 @@ local function InitUI()
 
     -- Personality Dropdown (Classic Era compatible)
     -- Uses UIDropDownMenuTemplate — the correct frame type for Classic Era dropdowns.
-    local dropdown = CreateFrame("Frame", "LoudmouthPersonalityDropdown", Loudmouth.UIFrame, "UIDropDownMenuTemplate")
-    dropdown:SetPoint("TOP", infoText, "BOTTOM", 0, -(ROW_GAP + 14))
+    dropdown = CreateFrame("Frame", "LoudmouthPersonalityDropdown", Loudmouth.UIFrame, "UIDropDownMenuTemplate")
+    dropdown:SetPoint("TOP", traitsText, "BOTTOM", 0, -(ROW_GAP + 14))
     UIDropDownMenu_SetWidth(dropdown, CONTENT_W - 24)
     dropdown:Show()
 
     -- Label above the dropdown so the control reads clearly.
-    local dropdownLabel = Loudmouth.UIFrame:CreateFontString()
+    dropdownLabel = Loudmouth.UIFrame:CreateFontString()
     dropdownLabel:SetFontObject("GameFontNormalSmall")
     dropdownLabel:SetPoint("BOTTOMLEFT", dropdown, "TOPLEFT", 20, 3)
     dropdownLabel:SetText("Personality")
@@ -371,6 +438,7 @@ local function InitUI()
                 info.func = function(button)
                     Loudmouth.CurrentPersonality = button.value
                     UIDropDownMenu_SetText(dropdown, button.value)
+                    UpdateTraitsPreview()
                     print("|cFFFF8000[Loudmouth]|r Selected:", button.value)
                 end
                 UIDropDownMenu_AddButton(info, level)
@@ -384,6 +452,8 @@ local function InitUI()
     else
         UIDropDownMenu_SetText(dropdown, "No personalities available")
     end
+
+    UpdateTraitsPreview()
 
     -- Button factory: Blizzard's UIPanelButtonTemplate gives us proper, readable
     -- text with built-in normal/hover/pushed states — no hand-rolled textures.
@@ -402,7 +472,7 @@ local function InitUI()
     end
 
     -- Debug Mode Toggle
-    local debugButton = MakeButton("Debug Mode: " .. (Loudmouth.DebugMode and "ON" or "OFF"), nil, nil)
+    local debugButton = MakeButton("Debug Mode: " .. (Loudmouth.DebugMode and "ON" or "OFF"), dropdown, nil)
     debugButton:SetScript("OnClick", function(self)
         Loudmouth.DebugMode = not Loudmouth.DebugMode
         self:SetText("Debug Mode: " .. (Loudmouth.DebugMode and "ON" or "OFF"))
@@ -434,16 +504,7 @@ local function InitUI()
     end)
 
     UpdatePlayerInfo()
-
-    -- Size the panel to hug its content. Sum the vertical layout deterministically
-    -- from the constants (robust — no reliance on live GetTop/GetBottom coords):
-    --   pad + title + gap + info + gap + dropdown + (gap+6) + 4 buttons/gaps + pad
-    local titleH, infoH, dropdownH = 18, 14, 32
-    local contentH = PAD + titleH + ROW_GAP + infoH + (ROW_GAP + 14) + dropdownH
-        + (ROW_GAP + 6)                         -- extra space before first button
-        + (BUTTON_H * 4) + (ROW_GAP * 3)        -- four stacked buttons + gaps
-        + PAD
-    Loudmouth.UIFrame:SetHeight(contentH)
+    UpdatePanelHeight()
 
     Loudmouth.UIFrame:Show()
 end

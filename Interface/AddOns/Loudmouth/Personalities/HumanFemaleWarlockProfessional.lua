@@ -623,4 +623,29 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
             },
         },
     },
+
+    Likes = {
+        places = {
+            "Undercity",
+            "Blackrock Mountain",
+            "crypt",
+        },
+        entities = {
+            "Undead",
+            "Warlock",
+            "class:Mage",
+        },
+    },
+
+    Hates = {
+        places = {
+            "Stormwind",
+            "Elwynn",
+        },
+        entities = {
+            "Paladin",
+            "Priest",
+            "class:Hunter",
+        },
+    },
 }

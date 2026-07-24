@@ -307,6 +307,151 @@ local function SafeSendChat(msg, chatType)
     SendChatMessage(msg, chatType or "SAY")
 end
 
+local function NormalizeText(value)
+    if type(value) ~= "string" or value == "" then
+        return nil
+    end
+    return string.lower(value)
+end
+
+local function MatchesText(candidate, needle)
+    local left = NormalizeText(candidate)
+    local right = NormalizeText(needle)
+    if not left or not right then
+        return false
+    end
+    return string.find(left, right, 1, true) ~= nil or string.find(right, left, 1, true) ~= nil
+end
+
+local function StandardizeRace(raceName, raceFile)
+    if type(raceFile) == "string" and raceFile ~= "" then
+        return RACE_TOKEN_TO_STANDARD[raceFile] or raceFile
+    end
+    return raceName
+end
+
+local function StandardizeClass(className, classFile)
+    if type(classFile) == "string" and classFile ~= "" then
+        return classFile:lower():gsub("^%l", string.upper)
+    end
+    return className
+end
+
+local function GetTargetIdentity()
+    local targetRaceName, targetRaceFile = UnitRace("target")
+    local targetClassName, targetClassFile = UnitClass("target")
+    return StandardizeRace(targetRaceName, targetRaceFile),
+        StandardizeClass(targetClassName, targetClassFile)
+end
+
+local TraitLineTemplates = {
+    Likes = {
+        place = {
+            "Ah, %s. I always enjoy this place.",
+            "%s suits me just fine.",
+            "Now this is a place I can appreciate: %s.",
+        },
+        entity = {
+            "A %s? Pleasant company.",
+            "%s. Good folk, by my reckoning.",
+            "A fine %s — I can work with that.",
+        },
+    },
+    Hates = {
+        place = {
+            "%s. I'd rather be anywhere else.",
+            "I could do without %s.",
+            "This place? Not my favorite: %s.",
+        },
+        entity = {
+            "A %s. Wonderful. Just what I needed.",
+            "%s? No thanks.",
+            "I have no patience for %s.",
+        },
+    },
+}
+
+local function BuildTraitLine(traitName, matchKind, subject)
+    local traitTemplates = TraitLineTemplates[traitName]
+    local templates = traitTemplates and traitTemplates[matchKind]
+    if not templates or #templates == 0 then
+        return nil
+    end
+    local template = templates[math.random(#templates)]
+    return string.format(template, subject or "that")
+end
+
+local function MatchesEntityEntry(entry, targetRace, targetClass)
+    if type(entry) == "table" then
+        if entry.race and MatchesText(targetRace, entry.race) then
+            return true, targetRace
+        end
+        if entry.class and MatchesText(targetClass, entry.class) then
+            return true, targetClass
+        end
+        return false
+    end
+
+    if type(entry) ~= "string" then
+        return false
+    end
+
+    local prefix, value = entry:match("^(%w+)%s*:%s*(.+)$")
+    if prefix == "race" then
+        return MatchesText(targetRace, value), targetRace
+    elseif prefix == "class" then
+        return MatchesText(targetClass, value), targetClass
+    end
+
+    if MatchesText(targetRace, entry) then
+        return true, targetRace
+    end
+    if MatchesText(targetClass, entry) then
+        return true, targetClass
+    end
+
+    return false
+end
+
+local function FindEntityTraitMatch(personality)
+    local targetRace, targetClass = GetTargetIdentity()
+    if not targetRace and not targetClass then
+        return
+    end
+
+    for _, traitName in ipairs({ "Hates", "Likes" }) do
+        local trait = personality[traitName]
+        local entities = type(trait) == "table" and trait.entities
+        if type(entities) == "table" then
+            for _, entry in ipairs(entities) do
+                local matched, subject = MatchesEntityEntry(entry, targetRace, targetClass)
+                if matched then
+                    return traitName, "entity", subject
+                end
+            end
+        end
+    end
+end
+
+local function FindPlaceTraitMatch(personality, realZone, subZone)
+    for _, traitName in ipairs({ "Hates", "Likes" }) do
+        local trait = personality[traitName]
+        local places = type(trait) == "table" and trait.places
+        if type(places) == "table" then
+            for _, place in ipairs(places) do
+                if type(place) == "string" then
+                    if MatchesText(realZone, place) then
+                        return traitName, "place", realZone
+                    end
+                    if subZone and subZone ~= "" and MatchesText(subZone, place) then
+                        return traitName, "place", subZone
+                    end
+                end
+            end
+        end
+    end
+end
+
 function Loudmouth.Trigger(action)
     -- ========================================================================
     -- Localization Strategy (English-first)
@@ -366,6 +511,16 @@ function Loudmouth.Trigger(action)
         local subZone = GetSubZoneText() or ""
 
         local matchedEntry = nil
+
+        local traitName, matchKind, matchSubject = FindPlaceTraitMatch(personality, realZone, subZone)
+        if traitName and matchKind and matchSubject then
+            local traitLine = BuildTraitLine(traitName, matchKind, matchSubject)
+            if traitLine then
+                SafeSendChat(traitLine, "SAY")
+                Loudmouth.PendingZoneComment = false
+                return
+            end
+        end
 
         -- 1. Try exact match against realZone
         if personality.zones and personality.zones[realZone] then
@@ -449,6 +604,16 @@ function Loudmouth.Trigger(action)
 
     local actionData = personality.actions[action]
     local phrases = actionData and actionData.lines
+
+    local traitName, matchKind, matchSubject = FindEntityTraitMatch(personality)
+    if traitName and matchKind and matchSubject then
+        local traitLine = BuildTraitLine(traitName, matchKind, matchSubject)
+        if traitLine then
+            SafeSendChat(traitLine, "SAY")
+            Loudmouth.Cooldowns[action] = now
+            return
+        end
+    end
 
     if not phrases then
         local genericData = personality.actions["Generic"]

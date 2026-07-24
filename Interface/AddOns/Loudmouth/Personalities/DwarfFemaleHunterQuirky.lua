@@ -105,5 +105,27 @@ Loudmouth._RawPersonalities["DwarfFemaleHunterQuirky"] = {
                 "Fresh air and fresh prey!",
             }
         },
-    }
+    },
+
+    Likes = {
+        places = {
+            "Dun Morogh",
+            "Ironforge",
+        },
+        entities = {
+            "Dwarf",
+            "Hunter",
+        },
+    },
+
+    Hates = {
+        places = {
+            "Undercity",
+            "Swamp",
+        },
+        entities = {
+            "Undead",
+            "Warlock",
+        },
+    },
 }
