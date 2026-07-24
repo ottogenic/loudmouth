@@ -46,5 +46,3 @@ It renders structure, not aesthetics. A clean render means "structurally sound,"
 ## Evidence to include
 In your **EVIDENCE**, quote the exact `luacheck` summary and the `ui-test.sh` `RESULT:`
 line -- and, on fail, the smallest failing slice. Open a PR only if the lead explicitly asked.
-(Reply format, incl. the mandatory `STATUS:` line, stays owned by the global Return Contract --
-this overlay never restates or replaces it.)

@@ -32,5 +32,4 @@ For in-scope changes, verify:
 
 When verifying a fix, cite in your **RESULT/EVIDENCE** only the findings tied to the supplied
 criteria as blockers or regressions; put unrelated observations in a separate non-blocking
-section. (Reply format, incl. the mandatory `STATUS:` line, stays owned by the global
-Return Contract -- this overlay never restates or replaces it.)
+section.
