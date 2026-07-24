@@ -285,8 +285,8 @@ def slide_harness():
         "",
         A(
             "                             [blue]┌────────────┐[/]     [purple]┌──────────────────────┐[/]",
-            "[grey]User prompt[/] [grey]──▶[/] [cyan]Opencode[/] [grey]──▶[/] [blue]│ [b]Lead Agent[/] [blue]│[/][grey]◀───▶[/][purple]│ [b]Python State Machine[/] [purple]│[/]",
-            "                             [blue]│[/]   [steel]Qwen3[/]    [blue]│[/]     [purple]│[/]   [grey]no model needed[/]    [purple]│[/]",
+            "             [grey]User prompt[/] [grey]──▶[/] [blue]│ [b]Lead Agent[/] [blue]│[/][grey]◀───▶[/][purple]│ [b]Python State Machine[/] [purple]│[/]",
+            "                             [blue]│[/]  [cyan]Opencode[/]  [blue]│[/]     [purple]│[/]   [grey]no model needed[/]    [purple]│[/]",
             "                             [blue]└────────────┘[/]     [purple]└──────────[cyan]┬[/][purple]───────────┘[/]",
             "                   [cyan]┌───────────────┬─────────────┬─────────┴─────┐[/]",
             "                   [cyan]▼[/]               [cyan]▼[/]             [cyan]▼[/]               [cyan]▼[/]",
