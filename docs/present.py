@@ -243,8 +243,9 @@ def slide_what():
 
 def slide_spark():
     return [
-        "[gold][b]THE DGX SPARK[/][/]",
-        "",
+        "[cyan][b]REQUIREMENT 1[/][/]",
+        "[grey]─────────────────────[/]",
+        "[gold][b]USE A DGX SPARK[/][/]",
         "",
         A(
             *box(
@@ -278,8 +279,9 @@ def slide_spark():
 
 def slide_harness():
     return [
-        "[gold][b]THE AGENT HARNESS[/][/]",
-        "[grey]what omodel-wire configures for opencode[/]",
+        "[cyan][b]REQUIREMENT 2[/][/]  [grey](INHERITED FROM REQ 1)[/]",
+        "[grey]────────────────────────────────────────────[/]",
+        "[gold][b]CONFIGURABLE LOCAL TOKEN ROUTING[/][/]",
         "",
         A(
             "                             [blue]┌────────────┐[/]     [purple]┌──────────────────────┐[/]",
