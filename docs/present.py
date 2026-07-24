@@ -364,7 +364,7 @@ def slide_runbook():
         "[gold][b]THE agent-runbook-review SKILL[/][/]",
         "[grey]\"perform an agent runbook review\"[/]",
         "",
-        "[grey]a periodic self-maintenance pass over the repo's agent docs[/]",
+        "[grey]a periodic self-maintenance pass[/]",
         "",
         "[white]AGENTS.md[/] [grey]·[/] [white]REVIEW.md[/] [grey]·[/] [white].agents/skills/*[/] [grey]·[/] [white]session log [grey](sqlite)[/]",
         "[grey]│[/]",
@@ -379,18 +379,16 @@ def slide_runbook():
         ),
         "[grey]│[/]",
         "[grey]▼[/]",
-        "[white]a Report:[/] [grey]proposed diffs  +  a change ledger[/]",
-        "[grey](report-first — never a silent rewrite)[/]",
         "",
         A(
-            "  [cyan]A[/]  [white]inventory & size skills[/]   [grey]≤40 lean · >80 LARGE[/]",
-            "  [cyan]B[/]  [white]compact & de-duplicate[/]    [grey]one rule, one home[/]",
-            "  [cyan]C[/]  [white]mine the session log[/]      [grey]recurring errors → notes[/]",
-            "  [cyan]D[/]  [white]new project skill?[/]        [grey]extend vs override[/]",
-            "  [cyan]E[/]  [white]draft any missing files[/]   [grey]AGENTS.md, REVIEW.md …[/]",
+            "  [cyan]A[/]  [white]mine the session log[/]     [grey]recurring errors → notes[/]",
+            "  [cyan]B[/]  [white]update/add skills[/]        [grey]extend vs override[/]",
+            "  [cyan]C[/]  [white]draft any missing files[/]  [grey]AGENTS.md, REVIEW.md …[/]",
+            "  [cyan]D[/]  [white]compact & de-duplicate[/]   [grey]one rule, one home[/]",
+            "  [cyan]E[/]  [white]inventory & size skills[/]  [grey]≤40 lean · >80 LARGE[/]",
         ),
         "",
-        "[orange][b]Consolidation only[/][/][grey] — never drops a MUST / NEVER / invariant.[/]",
+        "[cyan][b]Next session[/][/] [grey]=[/] [gold][b]smarter agents.[/][/]",
     ]
 
 
