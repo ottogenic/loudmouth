@@ -1,32 +1,45 @@
-Add Likes/Hates traits to Loudmouth personalities so a character's feelings about
+Add Loves/Hates traits to Loudmouth personalities so a character's feelings about
 places shape its zone banter.
 
 SCHEMA — every personality may define:
 
-    likes = { places = { ... }, entities = { ... } },
+    loves = { places = { ... }, entities = { ... } },
     hates = { places = { ... }, entities = { ... } },
 
 Both keys exist in the schema, but only `places` drives behavior in this change.
 `entities` is data-only for now (no target detection).
 
 BEHAVIOR — when the player enters a zone or subzone whose name contains a `places`
-keyword (case-insensitive substring), the character speaks a line from that trait.
-Hates wins if a zone matches both.
+keyword (case-insensitive substring), the character speaks a line reflecting that
+feeling. Precedence: hates > loves > existing zone/subzone lines. A trait match wins
+over a generic zone/subzone entry for the same location.
 
 APPLY TO Interface/AddOns/Loudmouth/Personalities/HumanFemaleWarlockProfessional.lua:
-- likes.places = { "Graveyard" }
+- loves.places = { "Graveyard" }
 - hates.places = { "Ironforge" }
 
-ADD new trait lines for those two cases in her voice — do NOT rewrite or replace her
-existing zones/subzones comments. Examples of the voice:
+RETONE HER EXISTING LINES so nothing contradicts her new feelings. Today she praises
+Ironforge — that must flip to contempt. Specifically:
+- zones["City of Ironforge"] — all 5 lines are admiring ("Home sweet home", "stonework
+  is impeccable"). Rewrite them in her hateful voice.
+- zones["Iron Forge"] and zones["Dwarven Halls"] — same place, and their lines admire
+  Ironforge too. Retone them, and make sure the spelling variant "Iron Forge" (with a
+  space) is still caught: the keyword "Ironforge" does NOT substring-match it.
+- zones["Loch Modan"] — its line compliments "Ironforge's streets"; adjust that clause
+  only, keep the rest.
+- subzones["grave"] — her existing lines already fit loving a graveyard; keep them as
+  the fallback and add Graveyard trait lines that take precedence.
+Leave every other zone/subzone entry untouched.
+
+Voice examples for the new lines:
 - Ironforge -> "Smells like feet and malt liquor... Dwarfs are disgusting."
 - Graveyard -> "Smells like death... I LOVE IT!"
 
 ALSO UPDATE:
 - Interface/AddOns/Loudmouth/Personalities/PERSONALITY_TEMPLATE.lua — document the
-  likes/hates block so new personalities follow it.
+  loves/hates block so new personalities follow it.
 - .agents/skills/personality-creator-project/SKILL.md — when authoring a new
-  personality, ask the user for Likes and Hates and use them to shape that
+  personality, ask the user for Loves and Hates and use them to shape that
   character's zone lines.
 
 OUT OF SCOPE: UI.lua, macro generation, entity/target detection.
