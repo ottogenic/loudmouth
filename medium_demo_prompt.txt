@@ -19,7 +19,7 @@ APPLY TO Interface/AddOns/Loudmouth/Personalities/HumanFemaleWarlockProfessional
 
 ADD new trait lines for those two cases in her voice — do NOT rewrite or replace her
 existing zones/subzones comments. Examples of the voice:
-- Ironforge -> "Smells like feet and malt liqour... Dwarfs are disgusting."
+- Ironforge -> "Smells like feet and malt liquor... Dwarfs are disgusting."
 - Graveyard -> "Smells like death... I LOVE IT!"
 
 ALSO UPDATE:

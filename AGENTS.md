@@ -18,7 +18,6 @@ Interface/AddOns/Loudmouth/        <- ALL addon code lives here, NOT the repo ro
 ├── UI.lua                         <- config frame, macro generator, slash commands
 ├── CopyChat.lua
 └── Personalities/                 <- drop-in personality files
-    ├── DwarfFemaleHunterQuirky.lua
     └── HumanFemaleWarlockProfessional.lua
 docs/                              <- PRD, CHECKLIST, RESEARCH_NOTES
 .luacheckrc                        <- luacheck config (WoW globals whitelisted)

@@ -8,7 +8,7 @@
 --               Warlock | Druid
 --   <Variant> — freeform descriptor (e.g. Quirky, Professional, Grumpy)
 --
--- EXAMPLE:  DwarfFemaleHunterQuirky.lua
+-- EXAMPLE:  HumanFemaleWarlockProfessional.lua
 --           HumanFemaleWarlockProfessional.lua
 --
 -- This file is a STATIC TEMPLATE.  Copy it, rename it to match the format above,

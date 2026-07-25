@@ -14,7 +14,7 @@ set for the current race/gender/class.
 
 - Path: `Interface/AddOns/Loudmouth/Personalities/`
 - Name: `<Race><Gender><Class><Personality>.lua` (PascalCase, no spaces), e.g.
-  `DwarfFemaleHunterQuirky.lua`, `HumanFemaleWarlockProfessional.lua`.
+  `HumanFemaleWarlockProfessional.lua`, `NightElfMaleDruidStoic.lua`.
 - The table key inside the file MUST exactly match the filename (minus `.lua`).
 
 ## Required file skeleton
