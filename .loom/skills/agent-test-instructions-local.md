@@ -1,8 +1,3 @@
----
-name: agent-test-extend
-description: Loudmouth's test + lint bar for agent-test. Load when running verification for the Loudmouth addon: luacheck plus headless UI rendering via ./tests/ui-test.sh.
----
-
 # Testing Loudmouth (agent-test)
 
 You own verification for this repo. Two gates: **lint** and **headless UI render**.

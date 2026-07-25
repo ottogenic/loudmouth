@@ -1,8 +1,3 @@
----
-name: agent-code-extend
-description: Loudmouth-specific implementation guardrails for agent-code: Classic Era Lua/API gotchas, macro safety, file layout, and required verification.
----
-
 # Loudmouth Coding Overlay
 
 Use this as an additive overlay on the global `agent-code` skill.

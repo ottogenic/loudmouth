@@ -1,8 +1,3 @@
----
-name: agent-architect-extend
-description: Loudmouth-specific architecture/review overlay for agent-architect. Keeps reviews scoped while enforcing Classic Era and Loudmouth invariants.
----
-
 # Loudmouth Architect Overlay
 
 Use this as an additive overlay on the global `agent-architect` skill. Preserve the

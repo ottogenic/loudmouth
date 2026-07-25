@@ -1,8 +1,3 @@
----
-name: agent-review-extend
-description: Loudmouth-specific review bar for agent-review. Checks Classic-Era API compliance, ToS-safe macro-triggered chat, macro/protected API safety, and personality file conventions.
----
-
 # Loudmouth Review Overlay (agent-review)
 
 Use this overlay with the global `agent-review` process. Review against `REVIEW.md`,
