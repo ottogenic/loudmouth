@@ -1,16 +1,16 @@
 # Loudmouth Architect Overlay
 
-Use this as an additive overlay on the global `agent-architect` skill. Preserve the
-Team-provided goal, acceptance criteria, and scope boundary.
+Additive overlay on the global `agent-architect` role instructions. Preserve the goal,
+acceptance criteria, and scope boundary from the dispatched packet.
 
 ## Scope Discipline
 
-- Classify findings with the global taxonomy: `blocker`, `regression`, `pre-existing`,
+- Classify findings with the classification taxonomy from your contract: `blocker`, `regression`, `pre-existing`,
   `future work`, or `out of scope`.
-- Treat PRD gaps or broad release-hardening items as `future work` unless Team explicitly
-  includes them in the acceptance criteria.
+- Treat PRD gaps or broad release-hardening items as `future work` unless the dispatched acceptance
+  criteria explicitly include them.
 - Do not convert historical REVIEW/PRD concerns into blockers unless the current change
-  violates them or Team requested a full release audit.
+  violates them or the packet requests a full release audit.
 
 ## Loudmouth-Specific Checks
 

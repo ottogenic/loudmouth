@@ -1,8 +1,8 @@
 # Loudmouth Review Overlay (agent-review)
 
-Use this overlay with the global `agent-review` process. Review against `REVIEW.md`,
-`AGENTS.md`, and the Team-provided acceptance criteria. Classify every finding using
-the global taxonomy; only `blocker` and `regression` findings block the current task.
+Additive overlay on the global `agent-review` role instructions. Review against `REVIEW.md`,
+`AGENTS.md`, and the acceptance criteria in the dispatched packet. Classify every finding
+using the classification taxonomy from your contract; only `blocker` and `regression` findings block the current task.
 
 ## Review Checklist
 

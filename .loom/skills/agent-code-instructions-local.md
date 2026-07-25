@@ -1,6 +1,6 @@
 # Loudmouth Coding Overlay
 
-Use this as an additive overlay on the global `agent-code` skill.
+Additive overlay on the global `agent-code` role instructions.
 
 ## Repo Layout
 
