@@ -336,8 +336,8 @@ def slide_solution():
             *box(
                 [
                     " [grey]Before the task, load your role skill:[/]",
-                    " [orange]1.[/] If [orange]agent-code-override[/] is available:",
-                    "    load [b]only[/] that skill. Skip [cyan]2[/][grey]-[/][green]3[/][grey].[/]",
+                    " [strike][grey]1. If agent-code-override is available:[/][/]",
+                    "    [strike][grey]load only that skill. Skip 2-3.[/][/]",
                     " [cyan]2.[/] Load [cyan]agent-code[/][grey].[/]",
                     " [green]3.[/] If [green]agent-code-extend[/] is available: load",
                     "    it too. If it conflicts, follow [cyan]agent-code[/][grey].[/]",
@@ -350,7 +350,7 @@ def slide_solution():
         ),
         "",
         A(
-            "  [orange]override[/]   [grey]<repo>/.agents/skills/[/][orange]agent-code-override[/][grey]/[/]",
+            "  [strike][grey]override   <repo>/.agents/skills/agent-code-override/[/][/]",
             "  [cyan]global[/]     [grey]~/.config/opencode/skills/[/][cyan]agent-code[/][grey]/[/]",
             "  [green]local[/]      [grey]<repo>/.agents/skills/[/][green]agent-code-extend[/][grey]/[/]",
         ),
