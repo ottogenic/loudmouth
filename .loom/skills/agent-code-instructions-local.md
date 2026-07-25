@@ -28,7 +28,9 @@ Additive overlay on the global `agent-code` role instructions.
 
 ## Verification
 
-- Run `luacheck .` after code changes.
-- Run `./tests/ui-test.sh` after UI/core behavior changes.
+- Your sanctioned focused check is `luacheck .` -- it is fast in this repo and an
+  explicit exception to the global no-broad-lint rule.
+- Leave `./tests/ui-test.sh` to `agent-test`; run it yourself only if the dispatched
+  task explicitly asks you to.
 - Put the exact command output (PASS/FAIL) and changed files (`path:line`) in your
   **EVIDENCE**. Do not claim success from intent.

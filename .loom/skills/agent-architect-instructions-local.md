@@ -5,8 +5,7 @@ acceptance criteria, and scope boundary from the dispatched packet.
 
 ## Scope Discipline
 
-- Classify findings with the classification taxonomy from your contract: `blocker`, `regression`, `pre-existing`,
-  `future work`, or `out of scope`.
+- Classify findings using the classification taxonomy delivered with your Return Contract.
 - Treat PRD gaps or broad release-hardening items as `future work` unless the dispatched acceptance
   criteria explicitly include them.
 - Do not convert historical REVIEW/PRD concerns into blockers unless the current change
@@ -23,8 +22,3 @@ For in-scope changes, verify:
 - personality files register into `_RawPersonalities` and contain `Generic` fallback lines;
 - core/UI changes are verified by `luacheck .` and `./tests/ui-test.sh`.
 
-## Review Output
-
-When verifying a fix, cite in your **RESULT/EVIDENCE** only the findings tied to the supplied
-criteria as blockers or regressions; put unrelated observations in a separate non-blocking
-section.
