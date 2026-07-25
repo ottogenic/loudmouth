@@ -1,0 +1,32 @@
+Add Likes/Hates traits to Loudmouth personalities so a character's feelings about
+places shape its zone banter.
+
+SCHEMA — every personality may define:
+
+    likes = { places = { ... }, entities = { ... } },
+    hates = { places = { ... }, entities = { ... } },
+
+Both keys exist in the schema, but only `places` drives behavior in this change.
+`entities` is data-only for now (no target detection).
+
+BEHAVIOR — when the player enters a zone or subzone whose name contains a `places`
+keyword (case-insensitive substring), the character speaks a line from that trait.
+Hates wins if a zone matches both.
+
+APPLY TO Interface/AddOns/Loudmouth/Personalities/HumanFemaleWarlockProfessional.lua:
+- likes.places = { "Graveyard" }
+- hates.places = { "Ironforge" }
+
+ADD new trait lines for those two cases in her voice — do NOT rewrite or replace her
+existing zones/subzones comments. Examples of the voice:
+- Ironforge -> "Smells like feet and malt liqour... Dwarfs are disgusting."
+- Graveyard -> "Smells like death... I LOVE IT!"
+
+ALSO UPDATE:
+- Interface/AddOns/Loudmouth/Personalities/PERSONALITY_TEMPLATE.lua — document the
+  likes/hates block so new personalities follow it.
+- .agents/skills/personality-creator-project/SKILL.md — when authoring a new
+  personality, ask the user for Likes and Hates and use them to shape that
+  character's zone lines.
+
+OUT OF SCOPE: UI.lua, macro generation, entity/target detection.
