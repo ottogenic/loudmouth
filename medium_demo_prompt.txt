@@ -1,32 +1,16 @@
-Add Loves/Hates traits to Loudmouth personalities. These are character data that
-guide how a personality's lines are written — the existing zone/subzone comment
-system already speaks them on zone entry, so no new matching logic is needed.
+Every personality should have Loves and Hates — places and entities they feel
+strongly about. Only wire up places for now.
 
-SCHEMA — every personality may define:
+Give Human Female Warlock Professional: Loves Graveyard, Hates Ironforge.
 
-    loves = { places = { ... }, entities = { ... } },
-    hates = { places = { ... }, entities = { ... } },
+Then go through her existing zone and subzone comments and fix the tone to match.
+Right now she praises Ironforge, which makes no sense if she hates it. The zone
+comments already fire on entry, so this is mostly about the data and the writing.
 
-APPLY TO Interface/AddOns/Loudmouth/Personalities/HumanFemaleWarlockProfessional.lua:
-- loves.places = { "Graveyard" }
-- hates.places = { "Ironforge" }
+Examples of the tone I want:
+- Ironforge: "Smells like feet and malt liquor... Dwarfs are disgusting."
+- Graveyard: "Smells like death... I LOVE IT!"
 
-Then retone her existing lines to match. She currently PRAISES Ironforge:
-- zones["City of Ironforge"] (5 admiring lines), zones["Iron Forge"], and
-  zones["Dwarven Halls"] — rewrite them in her hateful voice.
-- zones["Loch Modan"] — one clause compliments "Ironforge's streets"; adjust that
-  clause only.
-- subzones["grave"] — already fits loving a graveyard; sharpen if you like.
-Leave every other zone/subzone entry untouched.
-
-Voice examples:
-- Ironforge -> "Smells like feet and malt liquor... Dwarfs are disgusting."
-- Graveyard -> "Smells like death... I LOVE IT!"
-
-ALSO UPDATE:
-- Interface/AddOns/Loudmouth/Personalities/PERSONALITY_TEMPLATE.lua — document the
-  loves/hates block.
-- .agents/skills/personality-creator-project/SKILL.md — ask the user for Loves and
-  Hates when creating a personality, and use them to shape that character's lines.
-
-OUT OF SCOPE: UI.lua, macro generation, entity/target detection, new matching logic.
+Also add Loves and Hates to the personality template, and update the
+personality-creator-project skill so it asks for them when creating a new
+personality and uses them to shape that character's comments.
