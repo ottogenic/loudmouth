@@ -89,6 +89,44 @@ Loudmouth._RawPersonalities["<Race><Gender><Class><Variant>"] = {
     },
 
     -- ==================================================================
+    -- LIKES TABLE (place and entity preferences for banter)
+    -- ==================================================================
+    -- Each personality can define what they like and hate about places and entities.
+    -- Case-insensitive substring matching is used for all comparisons.
+    -- Hates takes precedence over Likes when multiple traits match.
+    --
+    -- Places: list of zone/subzone substrings that trigger banter when present.
+    -- Entities: list of target name/class/race substrings that trigger banter.
+    --
+    -- Trait-specific dialogue is defined under the Lines table below.
+    -- ==================================================================
+    Likes = {
+        Places = {
+            -- Example: zone/subzone substrings
+            -- "Lake",
+            -- "Water",
+            -- "Beach",
+        },
+        Entities = {
+            -- Example: target name/class/race substrings
+            -- "Gnome",
+            -- "Gnomes",
+        },
+    },
+    Hates = {
+        Places = {
+            -- Example: zone/subzone substrings
+            -- "Ironforge",
+            -- "Dwarfs",
+        },
+        Entities = {
+            -- Example: target name/class/race substrings
+            -- "Dark Iron",
+            -- "Dwarf",
+        },
+    },
+
+    -- ==================================================================
     -- SUBZONES TABLE (keyword-match subzone dialogue)
     -- ==================================================================
     -- Keys are substrings.  When GetSubZoneText() contains the key
@@ -104,6 +142,89 @@ Loudmouth._RawPersonalities["<Race><Gender><Class><Variant>"] = {
         --         "The forest is peaceful today.",
         --     },
         -- },
+    },
+
+    -- ==================================================================
+    -- LINES TABLE (trait-specific dialogue)
+    -- ==================================================================
+    -- Each personality can define dialogue that triggers when the player's
+    -- current zone/subzone or target matches their Likes or Hates traits.
+    --
+    -- Structure: Lines.<Polarity>.<Context>.<Trait> or Lines.<Polarity>.<Context>.Generic
+    --   Polarity: "Likes" or "Hates"
+    --   Context: "Places" or "Entities"
+    --   Trait: matched trait string from Likes/Hates table, or "Generic" for fallback
+    --
+    -- Priority chain:
+    --   1. Place traits (zones/subzones) are checked before action traits
+    --   2. Hates lines take precedence over Likes lines when multiple traits match
+    --   3. Entity lines are action-specific (use action key) or Generic fallback
+    --
+    -- Example: Ironforge (hates Dwarfs)
+    --   Likes.Places = { "Lake" }
+    --   Hates.Places = { "Ironforge", "Dwarfs" }
+    --   Lines.Hates.Places["Ironforge"] = {
+    --       "Smells like feet and malt liqour... Dwarfs are disgusting.",
+    --   }
+    --
+    -- Example: Casting Shadowbolt on Dark Iron Dwarf
+    --   Hates.Entities = { "Dark Iron", "Dark Iron Dwarf", "Dwarf" }
+    --   Lines.Hates.Entities["Dark Iron Dwarf"]["Shadow Bolt"] = {
+    --       "I hope this burns the hair of your ugly dwarf feet!",
+    --   }
+    --
+    -- Example: Casting Shadowbolt on Leper Gnome (generic entity fallback)
+    --   Likes.Entities = { "Gnome", "Leper Gnome" }
+    --   Lines.Likes.Entities["Leper Gnome"]["Generic"] = {
+    --       "Gnomes are adorable!",
+    --   }
+    -- ==================================================================
+    Lines = {
+        Likes = {
+            Places = {
+                -- Example: trait-specific lines for place matches
+                -- ["Lake"] = {
+                --     "Ohhh, the water is so pretty! Wonder if we can get a boat ride?",
+                -- },
+            },
+            Entities = {
+                -- Example: trait-specific lines for entity matches
+                -- ["Gnome"] = {
+                --     Generic = {
+                --         "Gnomes are adorable!",
+                --     },
+                -- },
+                -- ["Leper Gnome"] = {
+                --     Generic = {
+                --         "Gnomes are adorable!",
+                --     },
+                -- },
+            },
+        },
+        Hates = {
+            Places = {
+                -- Example: trait-specific lines for place matches
+                -- ["Ironforge"] = {
+                --     "Smells like feet and malt liqour... Dwarfs are disgusting.",
+                -- },
+            },
+            Entities = {
+                -- Example: action-specific entity lines
+                -- ["Dark Iron Dwarf"] = {
+                --     ["Shadow Bolt"] = {
+                --         "I hope this burns the hair of your ugly dwarf feet!",
+                --     },
+                --     Generic = {
+                --         "Dwarfs are so annoying.",
+                --     },
+                -- },
+                -- ["Dwarf"] = {
+                --     Generic = {
+                --         "Dwarfs are so annoying.",
+                --     },
+                -- },
+            },
+        },
     },
 }
 

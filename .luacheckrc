@@ -24,6 +24,8 @@ globals = {
     "UnitClass",
     "UnitRace",
     "UnitSex",
+    "UnitExists",
+    "UnitName",
     "GetSpellInfo",
     "IsSpellKnown",
     "CreateMacro",

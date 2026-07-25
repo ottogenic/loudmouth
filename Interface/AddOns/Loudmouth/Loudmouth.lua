@@ -110,6 +110,80 @@ Loudmouth.ZoneAliases = Loudmouth.ZoneAliases or {
 }
 
 -- ============================================================================
+-- Zone detection helpers
+-- ============================================================================
+Loudmouth.Zones = Loudmouth.Zones or {}
+
+--- Case-insensitive substring matcher.
+--  Returns true if needle is found in haystack.
+--  Uses string.find with plain mode (no regex).
+function Loudmouth.Zones._MatchString(needle, haystack)
+    if not needle or not haystack then return false end
+    return string.find(string.lower(haystack), string.lower(needle), 1, true) ~= nil
+end
+
+--- Detect place traits from current zone/subzone.
+--  Returns a table with 'matches' array of matched trait strings.
+function Loudmouth.Zones.DetectPlaceTraits(places)
+    if not places or type(places) ~= "table" then return {} end
+    local realZone = GetRealZoneText() or ""
+    local subZone = GetSubZoneText() or ""
+    local matches = {}
+    for _, trait in ipairs(places) do
+        if type(trait) == "string" and #trait > 0 then
+            if Loudmouth.Zones._MatchString(trait, realZone) or Loudmouth.Zones._MatchString(trait, subZone) then
+                matches[#matches + 1] = trait
+            end
+        end
+    end
+    return matches
+end
+
+-- ============================================================================
+-- Target detection helpers
+-- ============================================================================
+Loudmouth.Detection = Loudmouth.Detection or {}
+
+--- Case-insensitive substring matcher (same as Zones._MatchString).
+--  Returns true if needle is found in haystack.
+function Loudmouth.Detection._MatchString(needle, haystack)
+    if not needle or not haystack then return false end
+    return string.find(string.lower(haystack), string.lower(needle), 1, true) ~= nil
+end
+
+--- Gather target info safely (nil-safe).
+--  Returns { name = string|nil, class = string|nil, race = string|nil }
+function Loudmouth.Detection.GetTargetInfo()
+    local info = { name = nil, class = nil, race = nil }
+    if not UnitExists("target") then return info end
+    local name = UnitName("target")
+    if name and name ~= "" then info.name = name end
+    local _, class = UnitClass("target")
+    if class and class ~= "" then info.class = class end
+    local _, race = UnitRace("target")
+    if race and race ~= "" then info.race = race end
+    return info
+end
+
+--- Detect entity traits from target info.
+--  Returns a table with 'matches' array of matched trait strings.
+function Loudmouth.Detection.DetectEntityTraits(entities, targetInfo)
+    if not entities or type(entities) ~= "table" then return {} end
+    if not targetInfo or type(targetInfo) ~= "table" then return {} end
+    local matches = {}
+    for _, trait in ipairs(entities) do
+        if type(trait) == "string" and #trait > 0 then
+            if Loudmouth.Detection._MatchString(trait, targetInfo.name) or
+               Loudmouth.Detection._MatchString(trait, targetInfo.class) or
+               Loudmouth.Detection._MatchString(trait, targetInfo.race) then
+                matches[#matches + 1] = trait
+            end
+        end
+    end
+    return matches
+end
+
+-- ============================================================================
 -- Spell name resolver — handles locale/alias mismatches for GetSpellInfo
 -- ============================================================================
 
@@ -366,6 +440,33 @@ function Loudmouth.Trigger(action)
         local subZone = GetSubZoneText() or ""
 
         local matchedEntry = nil
+        local traitLine = nil
+
+        -- Trait detection: check place traits first (Hates before Likes)
+        local likesPlaces = personality.Likes and personality.Likes.Places or {}
+        local hatesPlaces = personality.Hates and personality.Hates.Places or {}
+        local hatesMatches = Loudmouth.Zones.DetectPlaceTraits(hatesPlaces)
+        local likesMatches = Loudmouth.Zones.DetectPlaceTraits(likesPlaces)
+
+        -- Resolve Hates before Likes if multiple traits match
+        local traitContext = nil
+        local traitKey = nil
+        if #hatesMatches > 0 then
+            traitContext = "Hates"
+            traitKey = hatesMatches[1]
+        elseif #likesMatches > 0 then
+            traitContext = "Likes"
+            traitKey = likesMatches[1]
+        end
+
+        -- Look for trait-specific lines if a trait matched
+        if traitContext and traitKey and personality.Lines and
+           personality.Lines[traitContext] and personality.Lines[traitContext].Places then
+            local traitLines = personality.Lines[traitContext].Places[traitKey]
+            if traitLines and #traitLines > 0 then
+                traitLine = traitLines[math.random(#traitLines)]
+            end
+        end
 
         -- 1. Try exact match against realZone
         if personality.zones and personality.zones[realZone] then
@@ -421,7 +522,11 @@ function Loudmouth.Trigger(action)
         end
 
         local played = false
-        if matchedEntry and matchedEntry.lines and #matchedEntry.lines > 0 then
+        -- Trait lines take precedence over conventional zone lines
+        if traitLine then
+            SafeSendChat(traitLine, "SAY")
+            played = true
+        elseif matchedEntry and matchedEntry.lines and #matchedEntry.lines > 0 then
             local line = matchedEntry.lines[math.random(#matchedEntry.lines)]
             SafeSendChat(line, "SAY")
             played = true
@@ -431,7 +536,7 @@ function Loudmouth.Trigger(action)
             played = true
         end
 
-        if not matchedEntry and not subMatchEntry and Loudmouth.ShowZoneDebug then
+        if not matchedEntry and not subMatchEntry and not traitLine and Loudmouth.ShowZoneDebug then
             print(string.format(
                 "|cFFFF8800[Dev Alert]|r Missing zone data for '%s' (sub: '%s'). Please add entries!",
                 realZone, subZone
@@ -447,6 +552,41 @@ function Loudmouth.Trigger(action)
         Loudmouth.PendingZoneComment = false
     end
 
+    -- Trait detection for entity-based banter (target-dependent)
+    local entityTraitLine = nil
+    local likesEntities = personality.Likes and personality.Likes.Entities or {}
+    local hatesEntities = personality.Hates and personality.Hates.Entities or {}
+    local targetInfo = Loudmouth.Detection.GetTargetInfo()
+    local hatesMatches = Loudmouth.Detection.DetectEntityTraits(hatesEntities, targetInfo)
+    local likesMatches = Loudmouth.Detection.DetectEntityTraits(likesEntities, targetInfo)
+
+    -- Resolve Hates before Likes if multiple traits match
+    local traitContext = nil
+    local traitKey = nil
+    if #hatesMatches > 0 then
+        traitContext = "Hates"
+        traitKey = hatesMatches[1]
+    elseif #likesMatches > 0 then
+        traitContext = "Likes"
+        traitKey = likesMatches[1]
+    end
+
+    -- Look for trait-specific lines if a trait matched
+    if traitContext and traitKey and personality.Lines and
+       personality.Lines[traitContext] and personality.Lines[traitContext].Entities then
+        -- First try action-specific line, then Generic fallback
+        local entityLinesTable = personality.Lines[traitContext].Entities[traitKey]
+        if entityLinesTable then
+            local actionLines = entityLinesTable[action]
+            local genericLines = entityLinesTable["Generic"]
+            if actionLines and #actionLines > 0 then
+                entityTraitLine = actionLines[math.random(#actionLines)]
+            elseif genericLines and #genericLines > 0 then
+                entityTraitLine = genericLines[math.random(#genericLines)]
+            end
+        end
+    end
+
     local actionData = personality.actions[action]
     local phrases = actionData and actionData.lines
 
@@ -455,7 +595,19 @@ function Loudmouth.Trigger(action)
         phrases = genericData and genericData.lines
     end
 
-    if phrases and #phrases > 0 then
+    -- Entity trait lines take precedence over conventional action lines, with same weight logic
+    if entityTraitLine then
+        local chance = 1.0
+        if not Loudmouth.DebugMode then
+            local weight = actionData and actionData.weight
+                or (personality.actions["Generic"] and personality.actions["Generic"].weight or 1.0)
+            chance = weight
+        end
+        if math.random() <= chance then
+            SafeSendChat(entityTraitLine, "SAY")
+            Loudmouth.Cooldowns[action] = now
+        end
+    elseif phrases and #phrases > 0 then
         -- Probability check
         local chance = 1.0
         if not Loudmouth.DebugMode then

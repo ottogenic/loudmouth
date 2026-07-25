@@ -2,6 +2,47 @@ Loudmouth = Loudmouth or {}
 Loudmouth._RawPersonalities = Loudmouth._RawPersonalities or {}
 
 Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
+    -- Likes and Hates traits for context-aware banter.
+    -- Each contains Places (zone/subzone substrings) and Entities (target name/class/race substrings).
+    -- Case-insensitive substring matching is used for all comparisons.
+    -- Hates takes precedence over Likes when multiple traits match.
+    -- Trait-specific dialogue is under Lines.<Polarity>.<Context>.<Trait> or Lines.<Polarity>.<Context>.Generic
+    Likes = {
+        Places = {
+            "Lake",
+            "Water",
+            "Ocean",
+            "Beach",
+            "Coast",
+            "River",
+            "Stream",
+            "pond",
+        },
+        Entities = {
+            "Gnome",
+            "Gnomes",
+            "Leper",
+            "Leper Gnome",
+        },
+    },
+    Hates = {
+        Places = {
+            "Ironforge",
+            "Iron Forge",
+            "Dwarfs",
+            "Dwarves",
+            "Dwarf",
+            "Forge",
+        },
+        Entities = {
+            "Dark Iron",
+            "Dark Iron Dwarf",
+            "Dwarf",
+            "Dwarfs",
+            "Dwarves",
+        },
+    },
+
     -- Per-personality abbreviation table.
     -- Each entry maps an action key to a short, unique uppercase abbreviation.
     -- If a spell is missing here, MakeMacroName falls back to the heuristic.
@@ -42,6 +83,129 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
         ["Generic"]            = "GRIC",
         ["Demon Skin"]         = "DMKN",
         ["Drain Soul"]         = "DRSL",
+    },
+
+    -- Trait-specific dialogue lines.
+    -- Structure: Lines.<Polarity>.<Context>.<Trait> or Lines.<Polarity>.<Context>.Generic
+    --   Polarity: "Likes" or "Hates"
+    --   Context: "Places" or "Entities"
+    --   Trait: matched trait string, or "Generic" for fallback
+    -- Hates lines take precedence over Likes lines when multiple traits match.
+    -- Entity lines are action-specific (use action key) or Generic fallback.
+    Lines = {
+        Likes = {
+            Places = {
+                ["Lake"] = {
+                    "Ohhh, the water is so pretty! Wonder if we can get a boat ride?",
+                    "Look at that water! So calm and inviting.",
+                },
+                ["Water"] = {
+                    "Water, water everywhere. So refreshing.",
+                    "The water glistens in the sunlight.",
+                },
+                ["Ocean"] = {
+                    "The ocean calls to me. So vast and mysterious.",
+                },
+                ["Beach"] = {
+                    "A day at the beach is perfect for some sunbathing.",
+                },
+                ["Coast"] = {
+                    "The coastal breeze is lovely today.",
+                },
+                ["River"] = {
+                    "The river flows gently. So peaceful.",
+                },
+                ["Stream"] = {
+                    "A gentle stream. So calming.",
+                },
+                ["pond"] = {
+                    "A quiet pond. Perfect for reflection.",
+                },
+            },
+            Entities = {
+                ["Gnome"] = {
+                    Generic = {
+                        "Gnomes are adorable!",
+                        "What a little cutie!",
+                        "Gnomes have such interesting gadgets.",
+                    },
+                },
+                ["Gnomes"] = {
+                    Generic = {
+                        "Gnomes are adorable!",
+                        "What a lovely gnome!",
+                    },
+                },
+                ["Leper"] = {
+                    Generic = {
+                        "The lepers... such tragic souls.",
+                    },
+                },
+                ["Leper Gnome"] = {
+                    Generic = {
+                        "Gnomes are adorable!",
+                        "Poor little leper, don't worry, it'll be over soon.",
+                    },
+                },
+            },
+        },
+        Hates = {
+            Places = {
+                ["Ironforge"] = {
+                    "Smells like feet and malt liqour... Dwarfs are disgusting.",
+                    "I can't stand this place. The dwarves are insufferable.",
+                    "Ironforge... the stone walls feel like a prison.",
+                },
+                ["Iron Forge"] = {
+                    "Smells like feet and malt liqour... Dwarfs are disgusting.",
+                },
+                ["Dwarfs"] = {
+                    "Smells like feet and malt liqour... Dwarfs are disgusting.",
+                },
+                ["Dwarves"] = {
+                    "Smells like feet and malt liqour... Dwarfs are disgusting.",
+                },
+                ["Dwarf"] = {
+                    "Smells like feet and malt liqour... Dwarfs are disgusting.",
+                },
+                ["Forge"] = {
+                    "The heat and noise of the forge is unbearable.",
+                },
+            },
+            Entities = {
+                ["Dark Iron"] = {
+                    ["Shadow Bolt"] = {
+                        "I hope this burns the hair of your ugly dwarf feet!",
+                    },
+                    Generic = {
+                        "Dark Irons are the worst kind of dwarf.",
+                    },
+                },
+                ["Dark Iron Dwarf"] = {
+                    ["Shadow Bolt"] = {
+                        "I hope this burns the hair of your ugly dwarf feet!",
+                    },
+                    Generic = {
+                        "Dwarfs are so annoying.",
+                    },
+                },
+                ["Dwarf"] = {
+                    Generic = {
+                        "Dwarfs are so annoying.",
+                    },
+                },
+                ["Dwarfs"] = {
+                    Generic = {
+                        "Dwarfs are so annoying.",
+                    },
+                },
+                ["Dwarves"] = {
+                    Generic = {
+                        "Dwarves are so annoying.",
+                    },
+                },
+            },
+        },
     },
 
     actions = {
