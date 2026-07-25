@@ -31,9 +31,11 @@ Additive overlay on the global `agent-code` role instructions.
 - Declare `local function` helpers BEFORE the function that calls them. A helper
   declared after `Loudmouth.Trigger()` resolves to a nil global at runtime and
   crashes the feature the first time it fires.
-- When a new dialogue source records a cooldown, write and check the SAME key.
-  `Loudmouth.Cooldowns` is read as `Cooldowns[action]`; if you record under a
-  different key (e.g. `"Likes"`/`"Hates"`), the cooldown silently never applies.
+- Trait dialogue must respect the existing cooldown. `Loudmouth.Trigger()` checks
+  `Loudmouth.Cooldowns[action]` near the top and writes the same key after speaking.
+  If a trait overrides the action, EITHER keep writing `Cooldowns[action]`, OR update
+  BOTH the check and the write to your new key. A write whose key is never checked
+  means the cooldown silently does nothing.
 - New WoW globals (e.g. `UnitName`) must be added to `.luacheckrc` in the same
   change -- `luacheck .` must stay at 0 warnings / 0 errors.
 
