@@ -132,11 +132,19 @@ and `.product.db` from a real install into the repo, then symlink:
 - Prefer `warcraft.wiki.gg` and `github.com/Gethe/wow-ui-source` for API docs.
 - `wowhead.com` returns **403** to bots; `wowpedia.wiki` is defunct. Don't retry them.
 
-## Skill index
+## Role instructions and skills
 
-- `agent-team-extend` — Loudmouth-specific Team routing: when to architect first vs code directly.
-- `agent-architect-extend` — Loudmouth-specific architecture/review scope and Classic-Era checks.
-- `agent-code-extend` — Loudmouth-specific coding guardrails for Lua 5.1, UI, macros, and verification.
-- `agent-review-extend` — Loudmouth-specific review bar and PR review checks.
-- `agent-test-extend` — how agent-test lints + headlessly renders the UI (`./tests/ui-test.sh`).
+Repo-specific worker guidance lives in `.loom/skills/` and is injected into each
+pipeline worker's dispatch packet automatically (no loading step):
+
+- `agent-architect-instructions-local.md` — architecture/review scope and Classic-Era checks.
+- `agent-code-instructions-local.md` — coding guardrails for Lua 5.1, UI, macros, and verification.
+- `agent-review-instructions-local.md` — review bar and PR review checks.
+- `agent-test-instructions-local.md` — how agent-test lints + headlessly renders the UI (`./tests/ui-test.sh`).
+
+An `agent-<role>-instructions-override.md` file, if present, replaces the global +
+local instructions for that role entirely.
+
+Loadable skills (via the `skill` tool, on demand):
+
 - `personality-creator-project` — authoring/editing files under `Personalities/`.
