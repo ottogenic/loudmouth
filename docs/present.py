@@ -6,17 +6,24 @@ Runs in the right split of a herdr terminal while the agent demo runs on the lef
 Stdlib only (no pip install). Left/Right arrows move between slides.
 
   Controls
-    ->  l  space  j  PgDn  n   next slide
-    <-  h  b      k  PgUp  p   previous slide
-    g / Home                   first slide
-    G / End                    last slide
-    1..9                       jump to slide N
-    q / Esc / Ctrl-C           quit
+    Right l  space          next build step (rolls to next slide at the end)
+    Left  h                 previous build step (rolls to prev slide at the start)
+    Down  j  n  PgDn        reveal the whole slide, then advance to the next
+    Up    k  p  b  PgUp     previous slide (a revisited slide rebuilds from scratch)
+    g / Home                first slide
+    G / End                 last slide
+    1..9                    jump to slide N
+    q / Esc / Ctrl-C        quit
+
+  Most slides have no build steps, so Left/Right just page through them. The
+  REQUIREMENT 2 and runbook slides build out in stages -- Right clicks them in
+  one element at a time; Down snaps a slide fully open before moving on.
 
   Preview without a TTY (for editing the art):
     python present.py --dump                 # all slides, 78x26, no color
     python present.py --dump --width 60 --height 20   # see the center-crop
     python present.py --dump --only 1 --color
+    python present.py --dump --only 4 --step 3 --color   # a single build stage
 
 The renderer keeps every slide centered in the terminal. When the pane is
 smaller than a slide it crops symmetrically from the center (the edges trim in);
@@ -216,29 +223,43 @@ def slide_title():
     ]
 
 
-def slide_what():
+def slide_what(step=None):
+    if step is None:
+        step = slide_what.build_steps
+    bubble = [  # the speech bubble + its tail down to the wizard's head
+        "     [grey]╭──────────────────────────────────────╮[/]",
+        "     [grey]│[/]  [cyan]Oooof... smells like malt liquor[/]    [grey]│[/]",
+        "     [grey]│[/]  [cyan]and feet... Dwarfs are nasty.[/]       [grey]│[/]",
+        "     [grey]╰──[grey]┬[/]───────────────────────────────────╯[/]",
+        "        [grey]│[/]",
+    ]
+    # Each row is the wizard (cols < 14) beside the IRONFORGE signpost (cols >= 14).
+    wizard = [
+        "        [purple]/\\[/]",
+        "       [purple]/  \\[/]              [gold] __________________[/]",
+        "      [purple]/____\\[/]             [gold]|[/]                  [gold]\\[/]",
+        "      [white]([/][gold]o  o[/][white])[/]             [gold]|[/]   [b][cyan]IRONFORGE[/][/]      [gold]▶[/]",
+        "     [purple]<[/]  [gold]||[/]  [purple]>[/]            [gold]|__________________/[/]",
+        "      [purple]/_[/][gold]||[/][purple]_\\[/]                   [gold]|[/]",
+        "        [gold]||[/]                     [gold]|[/]",
+        "       [purple]_[/][gold]||[/][purple]_[/]",
+    ]
+    # signpost is up from the start; the wizard walks in on click 1, bubble on 2.
+    scene = reveal_split(wizard, 14, show_left=step >= 1, show_right=True)
+    W = max(plain_len(parse_markup(ln)) for ln in bubble + scene)
+    rows = [padline(ln, W) if step >= 2 else " " * W for ln in bubble]
+    rows += [padline(ln, W) for ln in scene]
     return [
         "[gold][b]WHAT IT IS[/][/]",
         "",
         "[white]Personality-driven, context-aware banter.[/]",
         "[grey]reacting to spells, pets, mobs, and zones[/]",
         "",
-        A(
-            "     [grey]╭──────────────────────────────────────╮[/]",
-            "     [grey]│[/]  [cyan]Oooof... smells like malt liquor[/]    [grey]│[/]",
-            "     [grey]│[/]  [cyan]and feet... Dwarfs are nasty.[/]       [grey]│[/]",
-            "     [grey]╰──[grey]┬[/]───────────────────────────────────╯[/]",
-            "        [grey]│[/]",
-            "        [purple]/\\[/]",
-            "       [purple]/  \\[/]              [gold] __________________[/]",
-            "      [purple]/____\\[/]             [gold]|[/]                  [gold]\\[/]",
-            "      [white]([/][gold]o  o[/][white])[/]             [gold]|[/]   [b][cyan]IRONFORGE[/][/]      [gold]▶[/]",
-            "     [purple]<[/]  [gold]||[/]  [purple]>[/]            [gold]|__________________/[/]",
-            "      [purple]/_[/][gold]||[/][purple]_\\[/]                   [gold]|[/]",
-            "        [gold]||[/]                     [gold]|[/]",
-            "       [purple]_[/][gold]||[/][purple]_[/]",
-        ),
+        A(*rows),
     ]
+
+
+slide_what.build_steps = 2  # 1: the wizard, 2: the speech bubble
 
 
 def slide_spark():
@@ -277,71 +298,276 @@ def slide_spark():
     ]
 
 
-def slide_harness():
+# --- progressive "build" support (used by the harness slide) ----------------
+#
+# A build slide reveals itself in stages: up/down step through the stages and
+# right fast-forwards to the fully-built slide. To keep every element anchored
+# (things appear *in place* instead of the diagram re-centering as it grows),
+# the diagram is always rendered onto a fixed DIAGRAM_H x DIAGRAM_W grid; hidden
+# parts are blank cells. Each stage copies the relevant columns straight out of
+# the finished art below, so colors and alignment stay pixel-identical to the
+# original -- only the fan-out bus and two junction glyphs are regenerated.
+
+DIAGRAM_W = 59
+DIAGRAM_H = 13
+
+# The finished diagram. harness_diagram() carves stages out of this so there is
+# a single source of truth for the art.
+HARNESS_DIAGRAM = [
+    "                [blue]┌────────────┐[/]     [purple]┌──────────────────────┐[/]",
+    "[grey]User prompt[/] [grey]──▶[/] [blue]│ [b]Lead Agent[/] [blue]│[/][grey]◀───▶[/][purple]│ [b]Python State Machine[/] [purple]│[/]",
+    "                [blue]│[/]  [cyan]Opencode[/]  [blue]│[/]     [purple]│[/]   [grey]no model needed[/]    [purple]│[/]",
+    "                [blue]└────────────┘[/]     [purple]└──────────[cyan]┬[/][purple]───────────┘[/]",
+    "      [cyan]┌───────────────┬─────────────┬─────────┴─────┐[/]",
+    "      [cyan]▼[/]               [cyan]▼[/]             [cyan]▼[/]               [cyan]▼[/]",
+    "[green]┌───────────┐[/]     [green]┌───────┐[/]     [gold]┌────────┐[/]     [gold]┌──────────┐[/]",
+    "[green]│ [b]Architect[/] [green]│[/] [grey]──▶[/] [green]│ [b]Coder[/] [green]│[/] [grey]──▶[/] [gold]│ [b]Tester[/] [gold]│[/] [grey]──▶[/] [gold]│ [b]Reviewer[/] [gold]│[/]",
+    "[green]│ [gold]Opus 4.8[/]  [green]│[/]     [green]│ [steel]Qwen3[/] [green]│[/]     [gold]│ [steel]Qwen3[/]  [gold]│[/]     [gold]│ [gold]Opus 4.8[/] [gold]│[/]",
+    "[green]└───────────┘[/]     [green]└───[orange]▲[/][green]───┘[/]     [gold]└───[orange]┬[/][gold]────┘[/]     [gold]└────[orange]┬[/][gold]─────┘[/]",
+    "                      [orange]│[/]             [orange]│[/]               [orange]│[/]",
+    "                      [orange]├─── test ────┘[/]               [orange]│[/]",
+    "                      [orange]└───────── reviewer ──────────┘[/]",
+]
+
+_HARNESS_CELLS = None
+
+
+def markup_cells(s):
+    """Like parse_markup(), but return a per-character list of (char, styles)
+    where `styles` is the tuple of active style tags at that column. Lets us
+    slice the finished art by column while keeping each glyph's color."""
+    cells = []
+    stack = []
+    i, n = 0, len(s)
+    while i < n:
+        if s[i] == "[":
+            if s[i : i + 3] == "[/]" and stack:
+                stack.pop()
+                i += 3
+                continue
+            m = _TAGRE.match(s, i)
+            if m and m.group(1) in STYLES:
+                stack.append(m.group(1))
+                i = m.end()
+                continue
+        cells.append((s[i], tuple(stack)))
+        i += 1
+    return cells
+
+
+def cells_to_markup(row):
+    """Coalesce a list of (char, styles) cells back into a markup string."""
+    out = []
+    i, n = 0, len(row)
+    while i < n:
+        st = row[i][1]
+        j = i
+        while j < n and row[j][1] == st:
+            j += 1
+        text = "".join(c for c, _ in row[i:j])
+        if st:
+            out.append("".join("[" + t + "]" for t in st) + text + "[/]" * len(st))
+        else:
+            out.append(text)
+        i = j
+    return "".join(out)
+
+
+def reveal_split(lines, split, show_left=True, show_right=True):
+    """Split each line at visual column `split` and reveal the two halves
+    independently; hidden cells become spaces so nothing shifts or resizes."""
+    out = []
+    for ln in lines:
+        cells = markup_cells(ln)
+        left, right = cells[:split], cells[split:]
+        if not show_left:
+            left = [(" ", ())] * len(left)
+        if not show_right:
+            right = [(" ", ())] * len(right)
+        out.append(cells_to_markup(left + right))
+    return out
+
+
+def _harness_cells():
+    global _HARNESS_CELLS
+    if _HARNESS_CELLS is None:
+        _HARNESS_CELLS = [markup_cells(ln) for ln in HARNESS_DIAGRAM]
+    return _HARNESS_CELLS
+
+
+def harness_diagram(step):
+    """Return the fan-out diagram built up to `step` (0 = base .. 5 = full)."""
+    orig = _harness_cells()
+    grid = [[(" ", ()) for _ in range(DIAGRAM_W)] for _ in range(DIAGRAM_H)]
+
+    def copy(r, c0, c1):
+        src = orig[r]
+        for c in range(c0, c1 + 1):
+            if 0 <= c < len(src):
+                grid[r][c] = src[c]
+
+    def put(r, c, ch, *styles):
+        grid[r][c] = (ch, tuple(styles))
+
+    # base (step 0) -- empty diagram; everything clicks in from here
+
+    # 1 -- "User prompt ──▶" + Lead Agent box
+    if step >= 1:
+        copy(0, 16, 29)
+        copy(1, 0, 14)
+        copy(1, 16, 29)
+        copy(2, 16, 29)
+        copy(3, 16, 29)
+
+    # 2 -- ◀───▶ link + Python State Machine box
+    if step >= 2:
+        copy(0, 35, 58)
+        copy(1, 30, 34)
+        copy(1, 35, 58)
+        copy(2, 35, 58)
+        copy(3, 35, 58)
+
+    # 3 -- line to the architect + Architect box
+    if step >= 3:
+        copy(5, 6, 6)
+        for r in (6, 7, 8, 9):
+            copy(r, 0, 12)
+
+    # 4 -- architect→coder arrow, state-machine→coder line, Coder box
+    if step >= 4:
+        copy(5, 22, 22)
+        copy(6, 18, 26)
+        copy(7, 13, 17)
+        copy(7, 18, 26)
+        copy(8, 18, 26)
+        copy(9, 18, 21)
+        copy(9, 23, 26)
+        if step >= 5:
+            copy(9, 22, 22)  # ▲ feedback target (once a loop feeds it)
+        else:
+            put(9, 22, "─", "green")  # closed box bottom until then
+
+    # 5 -- Tester box + tester→coder (test) loop
+    if step >= 5:
+        copy(5, 36, 36)
+        copy(6, 32, 41)
+        copy(7, 27, 31)
+        copy(7, 32, 41)
+        copy(8, 32, 41)
+        copy(9, 32, 41)
+        copy(10, 22, 22)
+        copy(10, 36, 36)
+        copy(11, 23, 36)
+        if step >= 6:
+            copy(11, 22, 22)  # ├ once the reviewer loop also taps in
+        else:
+            put(11, 22, "└", "orange")
+
+    # 6 -- Reviewer box + reviewer→coder loop
+    if step >= 6:
+        copy(5, 52, 52)
+        copy(6, 47, 58)
+        copy(7, 42, 46)
+        copy(7, 47, 58)
+        copy(8, 47, 58)
+        copy(9, 47, 58)
+        copy(10, 52, 52)
+        copy(11, 52, 52)
+        copy(12, 22, 52)
+
+    # fan-out bus (row 4) -- regenerated so it only spans revealed workers
+    if step >= 3:
+        right = 52 if step >= 6 else 46
+        taps = {6: "┌", 46: "┴"}
+        if step >= 4:
+            taps[22] = "┬"
+        if step >= 5:
+            taps[36] = "┬"
+        if step >= 6:
+            taps[52] = "┐"
+        for c in range(6, right + 1):
+            grid[4][c] = (taps.get(c, "─"), ("cyan",))
+
+    return A(*[cells_to_markup(row) for row in grid])
+
+
+def slide_harness(step=None):
+    if step is None:
+        step = slide_harness.build_steps
+    done = step >= 7  # closing lines land after the diagram is fully built
     return [
         "[cyan][b]REQUIREMENT 2[/][/]  [grey](INHERITED FROM REQ 1)[/]",
         "[grey]────────────────────────────────────────────[/]",
         "[gold][b]CONFIGURABLE LOCAL TOKEN ROUTING[/][/]",
         "",
-        A(
-            "                [blue]┌────────────┐[/]     [purple]┌──────────────────────┐[/]",
-            "[grey]User prompt[/] [grey]──▶[/] [blue]│ [b]Lead Agent[/] [blue]│[/][grey]◀───▶[/][purple]│ [b]Python State Machine[/] [purple]│[/]",
-            "                [blue]│[/]  [cyan]Opencode[/]  [blue]│[/]     [purple]│[/]   [grey]no model needed[/]    [purple]│[/]",
-            "                [blue]└────────────┘[/]     [purple]└──────────[cyan]┬[/][purple]───────────┘[/]",
-            "      [cyan]┌───────────────┬─────────────┬─────────┴─────┐[/]",
-            "      [cyan]▼[/]               [cyan]▼[/]             [cyan]▼[/]               [cyan]▼[/]",
-            "[green]┌───────────┐[/]     [green]┌───────┐[/]     [gold]┌────────┐[/]     [gold]┌──────────┐[/]",
-            "[green]│ [b]Architect[/] [green]│[/] [grey]──▶[/] [green]│ [b]Coder[/] [green]│[/] [grey]──▶[/] [gold]│ [b]Tester[/] [gold]│[/] [grey]──▶[/] [gold]│ [b]Reviewer[/] [gold]│[/]",
-            "[green]│ [gold]Opus 4.8[/]  [green]│[/]     [green]│ [steel]Qwen3[/] [green]│[/]     [gold]│ [steel]Qwen3[/]  [gold]│[/]     [gold]│ [gold]Opus 4.8[/] [gold]│[/]",
-            "[green]└───────────┘[/]     [green]└───[orange]▲[/][green]───┘[/]     [gold]└───[orange]┬[/][gold]────┘[/]     [gold]└────[orange]┬[/][gold]─────┘[/]",
-            "                      [orange]│[/]             [orange]│[/]               [orange]│[/]",
-            "                      [orange]├─── test ────┘[/]               [orange]│[/]",
-            "                      [orange]└───────── reviewer ──────────┘[/]",
-        ),
+        harness_diagram(step),
         "",
-        "[grey]The state machine drives all four workers.[/]",
-        "[grey][b]Test[/][grey] & [b]reviewer[/][grey] loop back to [b]coder[/][grey] until the gates pass.[/]",
+        "[grey]The state machine drives all four workers.[/]" if done else "",
+        "[grey][b]Test[/][grey] & [b]reviewer[/][grey] loop back to [b]coder[/][grey] until the gates pass.[/]"
+        if done
+        else "",
         "",
-        "[gold][b]Match the size of the model to the size of the job.[/][/]",
+        "[gold][b]Match the size of the model to the size of the job.[/][/]" if done else "",
     ]
 
 
-def slide_problem():
+slide_harness.build_steps = 7  # 6 diagram stages + 1 for the closing lines
+
+
+def slide_problem(step=None):
+    if step is None:
+        step = slide_problem.build_steps
+    columns = [
+        "  [green]omodel-manager[/]  [green][b]fluent[/][/]          [red]loudmouth[/]  [red][b]lost[/][/]",
+        "  [grey]──────────────────────[/]        [grey]──────────────────────[/]",
+        "  [green]›[/] vLLM / Docker / SSH           [red]›[/] Lua 5.1  [grey](no goto)[/]",
+        "  [green]›[/] Python state machine          [red]›[/] Classic-Era WoW API",
+        "  [green]›[/] sm_121 quant flags            [red]›[/] BackdropTemplate quirks",
+        "  [green]›[/] model launch profiles         [red]›[/] macro & ToS safety",
+    ]
+    got_loudmouth = step >= 1  # right (red) column + the punchline click in together
     return [
         "[gold][b]THE PROBLEM[/][/]",
         "",
         "[white]The agent trained up its skills building [b]omodel-manager[/][white] ...[/]",
-        "[white]then walked into [b]loudmouth[/][white] with all the wrong instincts.[/]",
+        "[white]then walked into [b]loudmouth[/][white] with all the wrong instincts.[/]"
+        if got_loudmouth
+        else "",
         "",
-        A(
-            "  [green]omodel-manager[/]  [green][b]fluent[/][/]          [red]loudmouth[/]  [red][b]lost[/][/]",
-            "  [grey]──────────────────────[/]        [grey]──────────────────────[/]",
-            "  [green]›[/] vLLM / Docker / SSH           [red]›[/] Lua 5.1  [grey](no goto)[/]",
-            "  [green]›[/] Python state machine          [red]›[/] Classic-Era WoW API",
-            "  [green]›[/] sm_121 quant flags            [red]›[/] BackdropTemplate quirks",
-            "  [green]›[/] model launch profiles         [red]›[/] macro & ToS safety",
-        ),
+        A(*reveal_split(columns, 32, show_right=got_loudmouth)),
         "",
-        "[grey]Great skills. [white][b]Wrong repo.[/][/][grey] The context reset to zero.[/]",
+        "[grey]Great skills. [white][b]Wrong repo.[/][/][grey] The context reset to zero.[/]"
+        if got_loudmouth
+        else "",
     ]
 
 
-def slide_solution():
+slide_problem.build_steps = 1  # 1: the loudmouth (red) side + the punchline
+
+
+def slide_solution(step=None):
+    if step is None:
+        step = slide_solution.build_steps
+
+    def ko(s):  # final click knocks out the override branch (no override here)
+        return "[strike]" + s + "[/]" if step >= 4 else s
+
+    inner = [
+        " [grey]Before the task, load your role skill:[/]",
+        ko(" [orange]1.[/] If [orange]agent-code-override[/] is available:") if step >= 1 else "",
+        ko("    load [b]only[/] that skill. Skip [cyan]2[/][grey]-[/][green]3[/][grey].[/]") if step >= 1 else "",
+        " [cyan]2.[/] Load [cyan]agent-code[/][grey].[/]" if step >= 2 else "",
+        " [green]3.[/] If [green]agent-code-extend[/] is available: load" if step >= 3 else "",
+        "    it too. If it conflicts, follow [cyan]agent-code[/][grey].[/]" if step >= 3 else "",
+    ]
     return [
-        "[gold][b]THE SOLUTION[/][/]   [grey]everything old is new again[/]",
+        "[gold][b]THE SOLUTION???[/][/]   [grey]everything old is new again[/]",
         "",
         "[white][b]INHERITANCE[/][/]    [cyan]EXTEND[/][grey],[/] [orange]OVERRIDE[/]",
         "",
         A(
             *box(
-                [
-                    " [grey]Before the task, load your role skill:[/]",
-                    " [strike][grey]1. If agent-code-override is available:[/][/]",
-                    "    [strike][grey]load only that skill. Skip 2-3.[/][/]",
-                    " [cyan]2.[/] Load [cyan]agent-code[/][grey].[/]",
-                    " [green]3.[/] If [green]agent-code-extend[/] is available: load",
-                    "    it too. If it conflicts, follow [cyan]agent-code[/][grey].[/]",
-                ],
+                inner,
                 iw=48,
                 color="steel",
                 title="the role-skill loader",
@@ -350,7 +576,7 @@ def slide_solution():
         ),
         "",
         A(
-            "  [strike][grey]override   <repo>/.agents/skills/agent-code-override/[/][/]",
+            ko("  [orange]override[/]   [grey]<repo>/.agents/skills/[/][orange]agent-code-override[/][grey]/[/]"),
             "  [cyan]global[/]     [grey]~/.config/opencode/skills/[/][cyan]agent-code[/][grey]/[/]",
             "  [green]local[/]      [grey]<repo>/.agents/skills/[/][green]agent-code-extend[/][grey]/[/]",
         ),
@@ -359,37 +585,52 @@ def slide_solution():
     ]
 
 
-def slide_runbook():
-    return [
-        "[gold][b]THE agent-runbook-review SKILL[/][/]",
+slide_solution.build_steps = 4  # 1/2/3 click in, then 4 strikes out the override branch
+
+
+def slide_runbook(step=None):
+    if step is None:
+        step = slide_runbook.build_steps
+
+    # The pipeline (the "perform ..." invocation -> inputs -> RUNBOOK REVIEW box)
+    # is one build stage; the ABCDE table and the closing line are the next two.
+    # Hidden stages leave equal-height blanks so the title never shifts.
+    pipeline = [
         "[grey]\"perform an agent runbook review\"[/]",
-        "",
-        "[grey]a periodic self-maintenance pass[/]",
         "",
         "[white]AGENTS.md[/] [grey]·[/] [white]REVIEW.md[/] [grey]·[/] [white].agents/skills/*[/] [grey]·[/] [white]session log [grey](sqlite)[/]",
         "[grey]│[/]",
         "[grey]▼[/]",
-        A(
-            *box(
-                ["  [b][cyan]RUNBOOK REVIEW[/][/]  "],
-                iw=18,
-                color="cyan",
-                lead="",
-            )
-        ),
+        A(*box(["  [b][cyan]RUNBOOK REVIEW[/][/]  "], iw=18, color="cyan", lead="")),
         "[grey]│[/]",
         "[grey]▼[/]",
-        "",
-        A(
-            "  [cyan]A[/]  [white]mine the session log[/]     [grey]recurring errors → notes[/]",
-            "  [cyan]B[/]  [white]update/add skills[/]        [grey]extend vs override[/]",
-            "  [cyan]C[/]  [white]draft any missing files[/]  [grey]AGENTS.md, REVIEW.md …[/]",
-            "  [cyan]D[/]  [white]compact & de-duplicate[/]   [grey]one rule, one home[/]",
-            "  [cyan]E[/]  [white]inventory & size skills[/]  [grey]≤40 lean · >80 LARGE[/]",
-        ),
-        "",
-        "[cyan][b]Next session[/][/] [grey]=[/] [gold][b]smarter agents.[/][/]",
     ]
+    abcde = A(
+        "  [cyan]A[/]  [white]mine the session log[/]     [grey]recurring errors → notes[/]",
+        "  [cyan]B[/]  [white]update/add skills[/]        [grey]extend vs override[/]",
+        "  [cyan]C[/]  [white]draft any missing files[/]  [grey]AGENTS.md, REVIEW.md …[/]",
+        "  [cyan]D[/]  [white]compact & de-duplicate[/]   [grey]one rule, one home[/]",
+        "  [cyan]E[/]  [white]inventory & size skills[/]  [grey]≤40 lean · >80 LARGE[/]",
+    )
+
+    def blanks(block):  # same row count as `block`, but empty (keeps layout put)
+        rows = sum(len(b) if isinstance(b, Art) else 1 for b in block) \
+            if isinstance(block, list) else len(block)
+        return [""] * rows
+
+    return [
+        "[gold][b]THE agent-runbook-review SKILL[/][/]",
+        "[grey]a periodic self-maintenance pass[/]",
+        "",
+        *(pipeline if step >= 1 else blanks(pipeline)),
+        "",
+        *([abcde] if step >= 2 else blanks(abcde)),
+        "",
+        "[cyan][b]Next session[/][/] [grey]=[/] [gold][b]smarter agents![/][/]" if step >= 3 else "",
+    ]
+
+
+slide_runbook.build_steps = 3  # pipeline, then ABCDE, then the closing line
 
 
 def slide_end():
@@ -426,12 +667,23 @@ N = len(SLIDES)
 # ---------------------------------------------------------------------------
 
 
-def footer_line(index, cols):
+def max_steps(index):
+    return getattr(SLIDES[index], "build_steps", 0)
+
+
+def slide_entries(index, step):
+    fn = SLIDES[index]
+    steps = getattr(fn, "build_steps", 0)
+    return fn(min(step, steps)) if steps else fn()
+
+
+def footer_line(index, cols, step=0, steps=0):
     dots = "".join("●" if k == index else "○" for k in range(N))
+    build = f"[cyan]←→ build {min(step, steps)}/{steps}[/]   " if steps else ""
     mk = (
         f"[red]loudmouth[/]    [grey]{dots}[/]    "
         f"[white][b]{index + 1}[/][/][grey]/{N}[/]    "
-        f"[d]◀ prev   next ▶   ·   q quit[/]"
+        f"{build}[d]◀ prev   next ▶   ·   q quit[/]"
     )
     return compose(parse_markup(mk), cols)
 
@@ -455,8 +707,8 @@ def _layout_block(entries):
     return out
 
 
-def frame_lines(index, cols, rows):
-    canvas = _layout_block(SLIDES[index]())
+def frame_lines(index, cols, rows, step=0):
+    canvas = _layout_block(slide_entries(index, step))
     reserve = 2 if rows >= 9 else 0  # blank spacer + footer
     body_rows = max(1, rows - reserve)
 
@@ -472,7 +724,7 @@ def frame_lines(index, cols, rows):
     out = [compose(l, cols) for l in vis]
     if reserve:
         out.append(" " * cols)
-        out.append(footer_line(index, cols))
+        out.append(footer_line(index, cols, step, max_steps(index)))
     return out[:rows]
 
 
@@ -501,19 +753,28 @@ def enable_win_vt():
 
 
 # --- key decoding -----------------------------------------------------------
+#
+# Two axes. Left/Right walk a slide's build steps (and roll over to the
+# neighbouring slide at the ends) -- Right also fast-forwards the current build
+# to fully-open before crossing. Up/Down move whole slides; Down first snaps the
+# build open in one shot, Up always leaves (resetting so a revisit starts fresh).
 
-NEXT, PREV, FIRST, LAST, QUIT = "NEXT", "PREV", "FIRST", "LAST", "QUIT"
+STEP_NEXT, STEP_PREV = "STEP_NEXT", "STEP_PREV"      # Right / Left
+SLIDE_NEXT, SLIDE_PREV = "SLIDE_NEXT", "SLIDE_PREV"  # Down / Up
+FIRST, LAST, QUIT = "FIRST", "LAST", "QUIT"
 
 
 def _decode_unix(data):
     if data in (b"q", b"Q", b"\x1b", b"\x03"):
         return QUIT
-    if data in (b"\x1b[C", b"\x1bOC", b"\x1b[B", b"\x1bOB", b" ", b"l", b"j",
-                b"n", b"\r", b"\x1b[6~"):
-        return NEXT
-    if data in (b"\x1b[D", b"\x1bOD", b"\x1b[A", b"\x1bOA", b"h", b"k", b"p",
-                b"b", b"\x7f", b"\x1b[5~"):
-        return PREV
+    if data in (b"\x1b[C", b"\x1bOC", b"l", b" ", b"\r"):       # Right / l / space
+        return STEP_NEXT
+    if data in (b"\x1b[D", b"\x1bOD", b"h"):                     # Left / h
+        return STEP_PREV
+    if data in (b"\x1b[B", b"\x1bOB", b"j", b"n", b"\x1b[6~"):   # Down / j / n / PgDn
+        return SLIDE_NEXT
+    if data in (b"\x1b[A", b"\x1bOA", b"k", b"p", b"b", b"\x7f", b"\x1b[5~"):
+        return SLIDE_PREV                                        # Up / k / p / b / PgUp
     if data in (b"g", b"\x1b[H", b"\x1b[1~", b"\x1bOH"):
         return FIRST
     if data in (b"G", b"\x1b[F", b"\x1b[4~", b"\x1bOF"):
@@ -525,14 +786,20 @@ def _decode_unix(data):
 
 def _decode_win(ch, ch2=None):
     if ch2 is not None:
-        return {"K": PREV, "M": NEXT, "H": PREV, "P": NEXT,
-                "G": FIRST, "O": LAST, "I": PREV, "Q": NEXT}.get(ch2)
+        return {"M": STEP_NEXT, "K": STEP_PREV,      # Right / Left
+                "P": SLIDE_NEXT, "H": SLIDE_PREV,     # Down / Up
+                "Q": SLIDE_NEXT, "I": SLIDE_PREV,     # PgDn / PgUp
+                "G": FIRST, "O": LAST}.get(ch2)
     if ch in ("q", "Q", "\x1b", "\x03"):
         return QUIT
-    if ch in (" ", "l", "j", "n", "\r"):
-        return NEXT
-    if ch in ("h", "k", "p", "b", "\x08"):
-        return PREV
+    if ch in ("l", " ", "\r"):
+        return STEP_NEXT
+    if ch == "h":
+        return STEP_PREV
+    if ch in ("j", "n"):
+        return SLIDE_NEXT
+    if ch in ("k", "p", "b", "\x08"):
+        return SLIDE_PREV
     if ch == "g":
         return FIRST
     if ch == "G":
@@ -594,13 +861,14 @@ def run_interactive(start):
     out.flush()
 
     index = max(0, min(N - 1, start))
+    step = 0
     last = None
     try:
         while True:
             cols, rows = get_size()
-            state = (index, cols, rows)
+            state = (index, step, cols, rows)
             if state != last:
-                buf = "\x1b[H" + "\r\n".join(frame_lines(index, cols, rows))
+                buf = "\x1b[H" + "\r\n".join(frame_lines(index, cols, rows, step))
                 buf += _reset()
                 out.write(buf)
                 out.flush()
@@ -609,18 +877,34 @@ def run_interactive(start):
             key = wait_key(0.12)  # also the resize-poll cadence
             if key is None:
                 continue
+            m = max_steps(index)
             if key == QUIT:
                 break
-            elif key == NEXT:
-                index = min(N - 1, index + 1)
-            elif key == PREV:
-                index = max(0, index - 1)
+            elif key == STEP_NEXT:           # Down: next build step, else next slide
+                if step < m:
+                    step += 1
+                elif index < N - 1:
+                    index, step = index + 1, 0
+            elif key == STEP_PREV:           # Up: previous build step, else prev slide
+                if step > 0:
+                    step -= 1
+                elif index > 0:
+                    index, step = index - 1, 0
+            elif key == SLIDE_NEXT:          # Right: reveal all, then next slide
+                if step < m:
+                    step = m
+                elif index < N - 1:
+                    index, step = index + 1, 0
+            elif key == SLIDE_PREV:          # Left: previous slide, build reset
+                if index > 0:
+                    index -= 1
+                step = 0
             elif key == FIRST:
-                index = 0
+                index, step = 0, 0
             elif key == LAST:
-                index = N - 1
+                index, step = N - 1, 0
             elif isinstance(key, tuple) and key[0] == "JUMP":
-                index = max(0, min(N - 1, key[1]))
+                index, step = max(0, min(N - 1, key[1])), 0
     except KeyboardInterrupt:
         pass
     finally:
@@ -629,12 +913,14 @@ def run_interactive(start):
         restore()
 
 
-def run_dump(width, height, only):
+def run_dump(width, height, only, step=None):
     idxs = range(N) if only is None else [only]
     bar = "+" + "-" * width + "+"
     for i in idxs:
+        # default: show each slide fully built; --step pins a build stage
+        s = max_steps(i) if step is None else max(0, min(step, max_steps(i)))
         print(bar)
-        for line in frame_lines(i, width, height):
+        for line in frame_lines(i, width, height, s):
             # pad/trim to width for the frame (compose already sized it, but
             # ANSI-free width math only holds when COLOR is off)
             print("|" + line + "|" if not COLOR else "| " + line)
@@ -651,6 +937,8 @@ def main():
     ap.add_argument("--height", type=int, default=26)
     ap.add_argument("--only", type=int, default=None,
                     help="dump a single slide number (1-based)")
+    ap.add_argument("--step", type=int, default=None,
+                    help="dump a build slide at stage N (0=base); default=full")
     ap.add_argument("--start", type=int, default=1,
                     help="start on slide N (1-based)")
     ap.add_argument("--color", action="store_true", help="force color in --dump")
@@ -669,7 +957,7 @@ def main():
         if not args.color:
             COLOR = False
         only = None if args.only is None else max(0, min(N - 1, args.only - 1))
-        run_dump(max(20, args.width), max(8, args.height), only)
+        run_dump(max(20, args.width), max(8, args.height), only, args.step)
         return
 
     if not sys.stdin.isatty() or not sys.stdout.isatty():
