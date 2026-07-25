@@ -7,15 +7,9 @@ using the classification taxonomy from your contract; only `blocker` and `regres
 ## Review Checklist
 
 ### 1. Classic-Era API Compliance
-- **Templates:** Ensure `UIPanelFrameTemplate` is NOT used. Use `BackdropTemplate`.
-- **Backdrops:** Guard `SetBackdrop`: mix in `BackdropTemplateMixin` when needed and
-  call `SetBackdrop` only if it exists.
-- **Font Strings:** Verify `CreateFontString()` is called without a third argument;
-  set font objects afterward with `SetFontObject(...)`.
-- **Lua version:** No Lua 5.2+ syntax such as `goto` or `::label::`; Classic Era is Lua 5.1.
-- **Table Init:** Shared tables must be initialized as `X = X or {}` to prevent `.toc`
-  load-order wipes.
-- **Stability:** `CurrentPersonality` must have a safe fallback path; no nil concatenation.
+Verify against the canonical list in AGENTS.md ("Classic-Era gotchas"): templates,
+`SetBackdrop` guarding, `CreateFontString` arity, Lua 5.1 syntax, `X = X or {}` table
+init, and a non-nil `CurrentPersonality` fallback. Cite `path:line` for each violation.
 
 ### 2. ToS And Protected APIs
 - Chat must be emitted via `Loudmouth.Trigger()` from player-initiated macros.
@@ -38,3 +32,13 @@ using the classification taxonomy from your contract; only `blocker` and `regres
 ### 5. Verification
 - `luacheck .` must report 0 warnings / 0 errors.
 - `./tests/ui-test.sh` must report `RESULT: PASS`.
+
+## PR Workflow (when a PR review is delegated)
+
+- The `gh` CLI is authenticated as `ottogenic-bot`. If `git push` returns **403**, use
+  `gh` rather than raw git -- and do NOT silently proceed as if the PR was created.
+- Pass PR bodies via `--body-file` or a single-quoted heredoc. NEVER a double-quoted
+  `--body` -- backticks and parens get shell-interpreted.
+- **Reviewer/author collision:** the bot must own the branch and PR. If the owner token
+  created them, the reviewer cannot formally approve via the `gh` API (merge still works).
+- Use `GH_TOKEN_REVIEWER` for approve/merge actions; never push to the base branch.

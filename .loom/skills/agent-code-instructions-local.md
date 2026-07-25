@@ -12,10 +12,8 @@ Additive overlay on the global `agent-code` role instructions.
 ## Classic Era Lua/API Rules
 
 - Classic Era uses Lua 5.1: no `goto`, no `::label::`, no Lua 5.2+ syntax.
-- Use `BackdropTemplate`; never use `UIPanelFrameTemplate`.
-- Guard `SetBackdrop`: mix in `BackdropTemplateMixin` when needed and call only if present.
-- Call `frame:CreateFontString()` with no third argument; then call `SetFontObject(...)`.
-- Initialize shared tables as `X = X or {}`.
+- The frame/template/table-init rules are in AGENTS.md ("Classic-Era gotchas") and apply
+  here in full; do not restate them, follow them.
 - Add new WoW globals to `.luacheckrc`; do not use inline luacheck suppressions.
 
 ## Macro And Combat Safety

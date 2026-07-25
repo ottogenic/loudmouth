@@ -41,3 +41,14 @@ It renders structure, not aesthetics. A clean render means "structurally sound,"
 ## Evidence to include
 In your **EVIDENCE**, quote the exact `luacheck` summary and the `ui-test.sh` `RESULT:`
 line -- and, on fail, the smallest failing slice.
+
+## What the harness proves (and what it cannot)
+
+`./tests/ui-test.sh` is our first line of defense against broken UI changes: it scans
+for load-time Lua errors, dumps the `LoudmouthConfigFrame` tree to prove the panel and
+its children were built, and writes `loudmouth-panel.png` to eyeball. Without CASC game
+data present, textures render as flat rectangles -- structure is still valid. A clean
+run means "structurally sound", never "pixel-perfect"; the human owns the visual check.
+
+If the sim itself is missing or unbuilt, that is a local setup task for the human (see
+README), not something to work around by editing `tools/`.

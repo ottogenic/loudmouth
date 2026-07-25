@@ -55,3 +55,29 @@ Enable **Loudmouth** at the character-select AddOns screen, then log in.
   to our addon; vendored `tools/` and `_classic_era_/` are excluded).
 - Smoke-test the UI headlessly with `./tests/ui-test.sh` before pushing UI changes.
 - See `docs/` for the PRD, project checklist, and research notes.
+
+### Headless UI test — one-time local setup
+
+`./tests/ui-test.sh` renders the config panel without launching WoW, using a local build
+of [wow-ui-sim](https://github.com/Osso/wow-ui-sim). Setup (all git-ignored):
+
+- Clone + build the sim into `tools/wow-ui-sim/` with Era + GUI features:
+  `cargo build --release --bin wow-sim --no-default-features --features "sound,gui,casc,client-era"`
+- Drop your Classic-Era WoW data at `_classic_era_/` for CASC textures/fonts.
+- **Optional, for real pixels:** copy the shared `Data/` folder plus root `.build.info`
+  and `.product.db` from a real install into the repo, then
+  `ln -sfn $PWD/Data _classic_era_/Data` (the harness symlinks automatically if `Data/`
+  is present). Without these, textures render as flat rectangles — structure is still
+  valid. `Data/` is multi-GB and git-ignored; never commit it.
+
+On this DGX Spark (ARM64) there is no working hardware Vulkan, so the harness forces
+software Vulkan via lavapipe; the environment flags it needs are documented in
+`.loom/skills/agent-test-instructions-local.md`.
+
+### Agent instructions
+
+`AGENTS.md` holds what every agent needs (repo layout, external dirs, Classic-Era rules).
+Per-role guidance lives in `.loom/skills/agent-<role>-instructions-local.md` and is
+injected into each pipeline worker's dispatch packet automatically. An
+`agent-<role>-instructions-override.md`, if present, replaces global + local entirely.
+
