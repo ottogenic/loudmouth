@@ -26,6 +26,17 @@ Additive overlay on the global `agent-code` role instructions.
   spell-name or abbreviation macro names without architect approval.
 - Do not delete unrelated user macros; cleanup must target Loudmouth-owned names only.
 
+## Lua Structure And Existing Contracts
+
+- Declare `local function` helpers BEFORE the function that calls them. A helper
+  declared after `Loudmouth.Trigger()` resolves to a nil global at runtime and
+  crashes the feature the first time it fires.
+- When a new dialogue source records a cooldown, write and check the SAME key.
+  `Loudmouth.Cooldowns` is read as `Cooldowns[action]`; if you record under a
+  different key (e.g. `"Likes"`/`"Hates"`), the cooldown silently never applies.
+- New WoW globals (e.g. `UnitName`) must be added to `.luacheckrc` in the same
+  change -- `luacheck .` must stay at 0 warnings / 0 errors.
+
 ## Verification
 
 - Your sanctioned focused check is `luacheck .` -- it is fast in this repo and an
