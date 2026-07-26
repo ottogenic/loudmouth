@@ -39,7 +39,8 @@ done
 cd "$(git rev-parse --show-toplevel)"
 
 echo "-> fetching origin (with tags) ..."
-git fetch --quiet --tags origin
+# --force: a moved demo/base tag is otherwise silently kept at its OLD commit
+git fetch --quiet --force --tags origin
 
 if [ "$MODE" = "tag" ] && ! git rev-parse -q --verify "$TARGET^{commit}" >/dev/null; then
   echo "ERROR: ref '$TARGET' not found. Create it with:" >&2
