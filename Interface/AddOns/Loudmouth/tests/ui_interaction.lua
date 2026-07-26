@@ -88,8 +88,14 @@ test("every banter line fits the SendChatMessage 255-char game limit", function(
             end
         end
     end
-    assertNotNil(Loudmouth._RawPersonalities)
-    for name, p in pairs(Loudmouth._RawPersonalities) do
+    -- The loader consumes _RawPersonalities at startup (Loudmouth.lua sets it
+    -- to nil after filtering into Loudmouth.Personalities) -- walk the survivor.
+    local reg = Loudmouth.Personalities or Loudmouth._RawPersonalities
+    assertNotNil(reg)
+    local count = 0
+    for name, p in pairs(reg) do
+        count = count + 1
         walk(p, name)
     end
+    assertTrue(count > 0, "no personalities registered to check")
 end)
