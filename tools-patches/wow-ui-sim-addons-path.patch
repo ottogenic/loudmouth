@@ -1,0 +1,20 @@
+diff --git a/src/addon_tests.rs b/src/addon_tests.rs
+index 14bac1af8..52c2e5f85 100644
+--- a/src/addon_tests.rs
++++ b/src/addon_tests.rs
+@@ -79,6 +79,15 @@ fn load_test_framework(env: &WowLuaEnv) {
+ }
+ 
+ fn resolve_addon_root(addon_name: &str) -> Option<PathBuf> {
++    // WOW_SIM_ADDONS_PATH wins when set: the cwd-ancestor walk below anchors on
++    // the executable location, which is wrong whenever the binary lives outside
++    // the addon checkout (shared/canonical installs, git worktrees).
++    if let Ok(env_path) = std::env::var("WOW_SIM_ADDONS_PATH") {
++        let candidate = PathBuf::from(env_path).join(addon_name);
++        if candidate.exists() {
++            return Some(candidate);
++        }
++    }
+     // wow-sim chdir's to the executable directory at startup (for GUI asset
+     // loading), so the addon dirs are not necessarily under the current dir:
+     // in a dev build cwd is `target/<profile>/` and the addon dirs live at the

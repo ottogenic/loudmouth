@@ -33,8 +33,10 @@ REPOS = {
     "wow-ui-sim": "https://github.com/Osso/wow-ui-sim.git",
     "wow-ui-source": "https://github.com/Gethe/wow-ui-source.git",
 }
-CARGO_BUILD = ["cargo", "build", "--release", "--bin", "wow-sim",
-               "--no-default-features", "--features", "sound,gui,casc,client-era"]
+# "sound" needs ALSA dev headers; build falls back without it (headless tests
+# never play audio anyway).
+FEATURE_SETS = ["sound,gui,casc,client-era", "gui,casc,client-era"]
+PATCHES_DIR = "tools-patches"  # local patches applied to the sim after every pull
 
 
 def run(cmd, cwd=None, check=True):
@@ -69,6 +71,36 @@ def ensure_symlink(link, target):
     os.makedirs(os.path.dirname(link), exist_ok=True)
     os.symlink(target, link)
     print(f"  link    {link} -> {target}")
+
+
+def apply_patches(repo_root, sim_dir):
+    """Re-apply local patches (e.g. WOW_SIM_ADDONS_PATH support in run-tests)
+    after a pull. Idempotent: skips patches whose marker is already present."""
+    pdir = os.path.join(repo_root, PATCHES_DIR)
+    if not os.path.isdir(pdir):
+        return
+    marker = "WOW_SIM_ADDONS_PATH wins when set"
+    target = os.path.join(sim_dir, "src", "addon_tests.rs")
+    if os.path.exists(target) and marker in open(target, encoding="utf-8").read():
+        print("  patch: already applied")
+        return
+    for p in sorted(os.listdir(pdir)):
+        if p.endswith(".patch"):
+            r = subprocess.run(["git", "-C", sim_dir, "apply", os.path.join(pdir, p)])
+            print(f"  patch {p}: {'applied' if r.returncode == 0 else 'FAILED -- resolve by hand'}")
+
+
+def build_sim(sim_dir):
+    env = dict(os.environ)
+    env["PATH"] = os.path.expanduser("~/.cargo/bin") + os.pathsep + env.get("PATH", "")
+    for feats in FEATURE_SETS:
+        cmd = ["cargo", "build", "--release", "--bin", "wow-sim",
+               "--no-default-features", "--features", feats]
+        print(f"  $ {' '.join(cmd)}")
+        if subprocess.run(cmd, cwd=sim_dir, env=env).returncode == 0:
+            return True
+        print(f"  build with '{feats}' failed; trying reduced feature set")
+    return False
 
 
 def main():
@@ -109,6 +141,8 @@ def main():
                 before = rev(canon)
                 run(["git", "-C", canon, "pull", "--ff-only"], check=False)
                 print(f"  {name}: {before} -> {rev(canon)}")
+        if name == "wow-ui-sim" and os.path.exists(canon):
+            apply_patches(repo_root, canon)
 
     # --- game data ------------------------------------------------------------
     data = args.data or state.get("data")
@@ -154,7 +188,8 @@ def main():
     sim_bin = os.path.join(parent, "wow-ui-sim", "target", "release", "wow-sim")
     if not link_only and (args.build or not os.path.exists(sim_bin)):
         print("building wow-sim (cargo, first build takes a while)")
-        run(CARGO_BUILD, cwd=os.path.join(parent, "wow-ui-sim"))
+        if not build_sim(os.path.join(parent, "wow-ui-sim")):
+            sys.exit("ERROR: sim build failed with every feature set")
     print(f"  sim: {sim_bin} ({'present' if os.path.exists(sim_bin) else 'MISSING'})"
           f"  [{rev(os.path.join(parent, 'wow-ui-sim'))}]")
 
