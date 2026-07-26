@@ -17,6 +17,13 @@ set for the current race/gender/class.
   `HumanFemaleWarlockProfessional.lua`, `NightElfMaleDruidStoic.lua`.
 - The table key inside the file MUST exactly match the filename (minus `.lua`).
 
+## Line Writing Rules
+
+- Each string in a `lines = {}` table is ONE complete in-game utterance, spoken alone.
+  Never split a sentence across entries.
+- Keep each entry to 1-2 sentences and under 255 characters (the `SendChatMessage`
+  hard limit -- longer lines truncate in-game; the test suite enforces this).
+
 ## Required file skeleton
 
 Every file starts with these two guard lines so `.toc` load order never wipes data:

@@ -72,3 +72,24 @@ test("Close button hides the panel", function()
 
     LoudmouthConfigFrame:Show() -- leave it visible for any later render checks
 end)
+
+test("every banter line fits the SendChatMessage 255-char game limit", function()
+    -- Chat messages beyond 255 chars are truncated by the client: an over-long
+    -- banter entry is a real in-game bug, not a style issue. Walk every string
+    -- in every personality: zones/subzones/actions lines tables alike.
+    local function walk(t, where)
+        for k, v in pairs(t) do
+            if type(v) == "table" then
+                walk(v, where .. "." .. tostring(k))
+            elseif type(v) == "string" and k ~= "name" then
+                assertTrue(#v <= 255,
+                    ("banter line exceeds 255 chars (%d) at %s: %s..."):format(
+                        #v, where, v:sub(1, 60)))
+            end
+        end
+    end
+    assertNotNil(Loudmouth._RawPersonalities)
+    for name, p in pairs(Loudmouth._RawPersonalities) do
+        walk(p, name)
+    end
+end)
