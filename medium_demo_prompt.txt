@@ -4,8 +4,9 @@ strongly about. Only wire up places for now.
 Give Human Female Warlock Professional: Loves Duskwood, Hates Ironforge.
 
 Then go through her existing zone and subzone comments and fix the tone to match.
-Right now she praises Ironforge, which makes no sense if she hates it. The zone
-comments already fire on entry, so this is mostly about the data and the writing.
+Right now she praises Ironforge, which makes no sense if she hates it. Give her
+4 comments for Duskwood and 4 for Ironforge. The zone comments already fire on
+entry, so this is mostly about the data and the writing.
 
 Examples of the tone I want:
 - Ironforge: "Smells like feet and malt liquor... Dwarfs are disgusting."
