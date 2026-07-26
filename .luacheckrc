@@ -65,6 +65,14 @@ exclude_files = {
     "addon_examples/",
 }
 
+-- Personality files are PROSE DATA, not code: each string in a lines={} table
+-- is one complete in-game utterance, picked at random. A line-length cap forces
+-- splitting sentences across entries, which makes characters speak fragments
+-- in-game (a real bug -- observed compliance scars in the warlock file). No cap.
+files["Interface/AddOns/Loudmouth/Personalities/"] = {
+    max_line_length = false,
+}
+
 -- The interaction tests run under wow-ui-sim's TestFramework, which injects
 -- test() and the assert* helpers as globals. Whitelist them for the tests dir only.
 files["Interface/AddOns/Loudmouth/tests/"] = {
