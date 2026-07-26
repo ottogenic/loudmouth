@@ -15,11 +15,21 @@
 set -uo pipefail
 
 # --- Paths -------------------------------------------------------------------
-REPO="/home/otto/Documents/loudmouth"
+# Resolve from THIS checkout (worktrees included) -- never a hardcoded path.
+REPO="$(cd "$(dirname "$0")/.." && git rev-parse --show-toplevel 2>/dev/null || pwd)"
 WSIM="$REPO/tools/wow-ui-sim/target/release/wow-sim"
 ADDONS="$REPO/Interface/AddOns"
 RESULTS="$REPO/tests/ui-sim-results"
 FRAME="LoudmouthConfigFrame"
+
+# Distinguish "environment not set up" from "tests failed" -- agents must never
+# read a missing simulator as a code regression.
+if [ ! -x "$WSIM" ]; then
+  echo "SETUP MISSING: wow-sim binary not found at $WSIM"
+  echo "This is an ENVIRONMENT problem, not a test failure. Build it per README"
+  echo "(or run from a checkout that has tools/ populated)."
+  exit 3
+fi
 
 mkdir -p "$RESULTS"
 
