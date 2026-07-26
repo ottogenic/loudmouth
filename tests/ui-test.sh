@@ -55,6 +55,8 @@ export WOW_SIM_ADDONS_PATH="$ADDONS"
 # lets Blizzard textures (dialog backdrop, button faces) extract from CASC.
 # Requires .build.info + .product.db copied into _classic_era_/ (see AGENTS.md).
 if [ -d "$REPO/Data" ] && [ ! -e "$REPO/_classic_era_/Data" ]; then
+    # Legacy layout only: a repo-root Data/ alongside a data-less install copy.
+    # The suite installer keeps Data inside the canonical wow-classic-data now.
     ln -sfn "$REPO/Data" "$REPO/_classic_era_/Data"
 fi
 

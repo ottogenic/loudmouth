@@ -171,8 +171,12 @@ def main():
             and not os.path.exists(canon_data_sub):
         print(f"  MIGRATE {in_repo_data} -> {canon_data_sub}")
         shutil.move(in_repo_data, canon_data_sub)
-    if os.path.exists(canon_data_sub):
-        ensure_symlink(os.path.join(target_root, "Data"), canon_data_sub)
+    # No repo-root Data symlink: everything reads it via _classic_era_/Data.
+    # Clean up one if an older installer version created it.
+    stale = os.path.join(target_root, "Data")
+    if os.path.islink(stale):
+        os.unlink(stale)
+        print(f"  removed redundant symlink {stale}")
 
     if not os.path.exists(os.path.join(data, ".build.info")):
         print(f"  WARNING: {data} has no .build.info -- textures may not render")
