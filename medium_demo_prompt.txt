@@ -1,5 +1,5 @@
-Every personality should have Loves and Hates — places and entities they feel
-strongly about. Only wire up places for now.
+Please implement a new feature: every personality should have Loves and Hates —
+places and entities they feel strongly about. Only wire up places for now.
 
 Give Human Female Warlock Professional: Loves Duskwood, Hates Ironforge.
 
