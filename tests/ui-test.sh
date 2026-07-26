@@ -48,7 +48,8 @@ mkdir -p "$RESULTS"
 # Game data lives OUTSIDE the repo (only the sim binary reads it; agents never
 # do). Resolve via the suite state file beside the MAIN repo (worktree-safe),
 # falling back to the conventional sibling folder.
-MAIN_REPO="$(dirname "$(cd "$REPO" && git rev-parse --git-common-dir)")"
+# --git-common-dir is RELATIVE when cwd is the main repo -- normalize via cd+pwd.
+MAIN_REPO="$(cd "$REPO" && cd "$(git rev-parse --git-common-dir)/.." && pwd)"
 SUITE_STATE="$(dirname "$MAIN_REPO")/.wow-ui-suite.json"
 WOW_DATA="$(python3 -c "import json,sys;print(json.load(open(sys.argv[1])).get('data',''))" "$SUITE_STATE" 2>/dev/null)"
 [ -d "$WOW_DATA" ] || WOW_DATA="$(dirname "$MAIN_REPO")/wow-classic-data"
