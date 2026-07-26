@@ -1,4 +1,10 @@
 version = "5.1"
+
+-- 160 for CODE (deep WoW frame-API indentation makes 120 -- luacheck's silent
+-- default -- needlessly tight; 160 still catches genuine sprawl). Personality
+-- prose data is uncapped below: those strings are in-game utterances, not code.
+max_line_length = 160
+
 globals = {
     "date",
     "ARG",

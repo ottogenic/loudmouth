@@ -431,24 +431,20 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
         ["Darnassus"] = {
             weight = 0.10,
             lines = {
-                "Night Elf arrogance in flesh and bark. They hide from history",
-                "while it catches up to them.",
+                "Night Elf arrogance in flesh and bark. They hide from history while it catches up to them.",
             },
         },
         ["Teldrassil"] = {
             weight = 0.10,
             lines = {
-                "A floating tree. The futility of trying to climb your way",
-                "to the heavens.",
+                "A floating tree. The futility of trying to climb your way to the heavens.",
             },
         },
         -- Mid-Level Hubs & Dark Places
         ["City of Ironforge"] = {
             weight = 0.15,
             lines = {
-                "Home sweet home. The stone works have excellent acoustic",
-                "properties, and the dwarves seem to drink with enough passion",
-                "to rival a cult gathering.",
+                "Home sweet home. The stone works have excellent acoustic properties, and the dwarves seem to drink with enough passion to rival a cult gathering.",
                 "The Great Forge is admirably efficient—heat, industry, and just enough danger to feel familiar.",
                 "Ironforge's stonework is impeccable. Even the summoning chambers could learn a thing or two.",
             },
@@ -456,44 +452,38 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
         ["Iron Forge"] = {
             weight = 0.15,
             lines = {
-                "The Great Forge never sleeps, and neither do the dwarves who",
-                "work it. A spectacle of industry and soot.",
+                "The Great Forge never sleeps, and neither do the dwarves who work it. A spectacle of industry and soot.",
             },
         },
         ["Dwarven Halls"] = {
             weight = 0.15,
             lines = {
-                "The halls beneath Ironforge are a marvel of stonework and",
-                "engineering, though the acoustics are rather dreadful.",
+                "The halls beneath Ironforge are a marvel of stonework and engineering, though the acoustics are rather dreadful.",
             },
         },
         ["Dun Morogh"] = {
             weight = 0.15,
             lines = {
                 "Cold and damp. Perfect conditions for an imp.",
-                "And those dwarves—honestly, the only civilized creatures",
-                "in the Alliance.",
+                "And those dwarves—honestly, the only civilized creatures in the Alliance.",
             },
         },
         ["Loch Modan"] = {
             weight = 0.10,
             lines = {
-                "Thelsamar is a forge town, but it lacks the artistic spark",
-                "of Ironforge's streets. It is simply... heavy industry.",
+                "Thelsamar is a forge town, but it lacks the artistic spark of Ironforge's streets. It is simply... heavy industry.",
             },
         },
         ["Westfall"] = {
             weight = 0.10,
             lines = {
-                "Furlbrow's farm is a tragic reminder of what happens",
-                "when you underestimate the void.",
+                "Furlbrow's farm is a tragic reminder of what happens when you underestimate the void.",
             },
         },
         ["Duskwood"] = {
             weight = 0.15,
             lines = {
-                "Now *this* is a landscape I appreciate. Twilight Grove",
-                "isn't much, but Darkshire knows how to handle its dead.",
+                "Now *this* is a landscape I appreciate. Twilight Grove isn't much, but Darkshire knows how to handle its dead.",
             },
         },
         ["Swamp of Sorrows"] = {
@@ -505,23 +495,19 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
         ["Badlands"] = {
             weight = 0.12,
             lines = {
-                "Kargath is surrounded by caverns. Do you have any idea",
-                "how convenient that is for excavating lost artifacts?",
+                "Kargath is surrounded by caverns. Do you have any idea how convenient that is for excavating lost artifacts?",
             },
         },
         ["Searing Gorge"] = {
             weight = 0.12,
             lines = {
-                "The air burns, but the volcanic soil is excellent for",
-                "brewing. Plus, Thorium Point is right next to the entrance",
-                "to Blackrock Mountain.",
+                "The air burns, but the volcanic soil is excellent for brewing. Plus, Thorium Point is right next to the entrance to Blackrock Mountain.",
             },
         },
         ["Blasted Lands"] = {
             weight = 0.15,
             lines = {
-                "We are close now. The Dark Portal hums with raw, unrefined",
-                "chaos. Delicious.",
+                "We are close now. The Dark Portal hums with raw, unrefined chaos. Delicious.",
             },
         },
         -- Late Game / Hardcore Endgame Zones
@@ -529,31 +515,26 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
             weight = 0.15,
             lines = {
                 "Fire everywhere. It is comforting, in a way.",
-                "Molten Core is right around the bend; the fel energy",
-                "radiating from the mountain would make even a lesser mage weep.",
+                "Molten Core is right around the bend; the fel energy radiating from the mountain would make even a lesser mage weep.",
             },
         },
         ["Western Plaguelands"] = {
             weight = 0.15,
             lines = {
-                "Chillwind Camp is freezing. But Scholomance... ah, that",
-                "ancient mausoleum. An entire dungeon of corpses waiting",
-                "for a fresh soul to bind them.",
+                "Chillwind Camp is freezing. But Scholomance... ah, that ancient mausoleum. An entire dungeon of corpses waiting for a fresh soul to bind them.",
             },
         },
         ["Eastern Plaguelands"] = {
             weight = 0.15,
             lines = {
-                "Light's Hope Chapel stands as a monument to human",
-                "stubbornness, but Stratholme remains the true prize.",
+                "Light's Hope Chapel stands as a monument to human stubbornness, but Stratholme remains the true prize.",
                 "An entire city preserved in undeath.",
             },
         },
         ["Blackrock Mountain"] = {
             weight = 0.18,
             lines = {
-                "A cathedral of ash and magma. The upper reaches house",
-                "our greatest trials—Lower, Upper, and the Deep.",
+                "A cathedral of ash and magma. The upper reaches house our greatest trials—Lower, Upper, and the Deep.",
             },
         },
         ["Deadwind Pass"] = {
@@ -573,8 +554,7 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
         ["Un'Goro Crater"] = {
             weight = 0.15,
             lines = {
-                "Prehistoric monsters and toxic mud. My absolute favorite",
-                "hunting ground.",
+                "Prehistoric monsters and toxic mud. My absolute favorite hunting ground.",
             },
         },
     },
@@ -605,8 +585,7 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
             weight = 0.15,
             lines = {
                 "Dark, damp, and completely pitch black. Just how I like it.",
-                "Are we near a cave yet? It's impossible to practice",
-                "properly in open daylight.",
+                "Are we near a cave yet? It's impossible to practice properly in open daylight.",
             },
         },
         ["ruin"] = {
