@@ -45,20 +45,22 @@ mkdir -p "$RESULTS"
 #                             addon actually loads.
 # WOW_SIM_ADDONS_PATH       : point the sim explicitly at OUR repo addon dir so it
 #                             never picks up a stale bundled/cached copy.
-export WOW_INSTALL_PATH="$REPO/_classic_era_"
+# Game data lives OUTSIDE the repo (only the sim binary reads it; agents never
+# do). Resolve via the suite state file beside the MAIN repo (worktree-safe),
+# falling back to the conventional sibling folder.
+MAIN_REPO="$(dirname "$(cd "$REPO" && git rev-parse --git-common-dir)")"
+SUITE_STATE="$(dirname "$MAIN_REPO")/.wow-ui-suite.json"
+WOW_DATA="$(python3 -c "import json,sys;print(json.load(open(sys.argv[1])).get('data',''))" "$SUITE_STATE" 2>/dev/null)"
+[ -d "$WOW_DATA" ] || WOW_DATA="$(dirname "$MAIN_REPO")/wow-classic-data"
+if [ ! -d "$WOW_DATA" ]; then
+  echo "SETUP MISSING: WoW game data not found (looked in $SUITE_STATE and $WOW_DATA)."
+  echo "Run ./install-wow-ui-test-suite.py --data /path/to/wow-install"
+  exit 3
+fi
+export WOW_INSTALL_PATH="$WOW_DATA"
 export VK_ICD_FILENAMES="/usr/share/vulkan/icd.d/lvp_icd.json"
 export WOW_SIM_LOAD_OUT_OF_DATE_ADDONS=1
 export WOW_SIM_ADDONS_PATH="$ADDONS"
-
-# CASC textures: the sim looks for game data at <install_root>/Data. Our shared
-# Data/ lives at the repo root (sibling to _classic_era_), so symlink it in. This
-# lets Blizzard textures (dialog backdrop, button faces) extract from CASC.
-# Requires .build.info + .product.db copied into _classic_era_/ (see AGENTS.md).
-if [ -d "$REPO/Data" ] && [ ! -e "$REPO/_classic_era_/Data" ]; then
-    # Legacy layout only: a repo-root Data/ alongside a data-less install copy.
-    # The suite installer keeps Data inside the canonical wow-classic-data now.
-    ln -sfn "$REPO/Data" "$REPO/_classic_era_/Data"
-fi
 
 fail=0
 

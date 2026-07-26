@@ -163,7 +163,24 @@ def main():
     for name in REPOS:
         ensure_symlink(os.path.join(target_root, "tools", name),
                        os.path.join(parent, name))
-    ensure_symlink(os.path.join(target_root, "_classic_era_"), data)
+    # NO _classic_era_ symlink: only the sim binary reads game data (agents do
+    # not), and ui-test.sh resolves it from the canonical home directly. Clean
+    # up links older installer versions created.
+    for stale_name in ("_classic_era_",):
+        stale = os.path.join(target_root, stale_name)
+        if os.path.islink(stale):
+            os.unlink(stale)
+            print(f"  removed obsolete symlink {stale}")
+
+    # addon_examples: reference-only corpus agents DO read -> one canonical
+    # copy, symlinked into every checkout for permission-free access.
+    canon_ex = os.path.join(parent, "wow-addon-examples")
+    in_repo_ex = os.path.join(repo_root, "addon_examples")
+    if os.path.isdir(in_repo_ex) and not os.path.islink(in_repo_ex)             and not os.path.exists(canon_ex):
+        print(f"  MIGRATE {in_repo_ex} -> {canon_ex}")
+        shutil.move(in_repo_ex, canon_ex)
+    if os.path.isdir(canon_ex):
+        ensure_symlink(os.path.join(target_root, "addon_examples"), canon_ex)
     # optional shared Data dir at repo root (README's CASC texture setup)
     in_repo_data = os.path.join(repo_root, "Data")
     canon_data_sub = os.path.join(data, "Data")

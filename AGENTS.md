@@ -28,18 +28,17 @@ tests/ui-test.sh                   <- headless UI harness (see agent-test instru
 root. Personality files are under `Interface/AddOns/Loudmouth/Personalities/` and are
 named `<race><gender><class><personality>.lua`.
 
-## External directories — present locally, NOT our code (all git-ignored)
+## External resources — symlinked in, NOT our code (all git-ignored)
 
-Never edit, lint, or treat these as our implementation:
+These are symlinks to shared homes beside the repo (managed by
+`install-wow-ui-test-suite.py`). Never edit, lint, or treat them as our code:
 
-- **`_classic_era_/`** — a real Classic Era game install; only a data source for the UI
-  simulator (textures/fonts). Blizzard's files, not ours.
-- **`addon_examples/`** — other people's published addons, kept for reference only. Read
-  them to see how a Classic-Era pattern is done in the wild; never add Loudmouth code here.
-- **`tools/`** — local build tooling and two upstream checkouts (`wow-ui-sim`, the headless
-  UI simulator; `wow-ui-source`, a read-only mirror of Blizzard's UI Lua/XML). Reference
-  them; never commit to or lint them. Note `tools/wow-ui-sim/Interface/AddOns/` can shadow
-  our addon if a stale copy lands there.
+- **`addon_examples/`** — other people's published addons, reference only. Read them to
+  see how a Classic-Era pattern is done in the wild; never add Loudmouth code here.
+- **`tools/wow-ui-sim`** — the headless UI simulator (separate repo, cargo-built).
+- **`tools/wow-ui-source`** — read-only mirror of Blizzard's UI Lua/XML, for API reference.
+
+WoW game data lives outside the repo entirely; `tests/ui-test.sh` locates it itself.
 
 ## Working agreement
 
