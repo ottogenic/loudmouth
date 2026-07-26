@@ -1,17 +1,10 @@
-Please implement a new feature: every personality should have Loves and Hates —
-places and entities they feel strongly about. Only wire up places for now.
+I need you to make a fix to the Human Female Warlock Professional personality.
 
-Give Human Female Warlock Professional: Loves Duskwood, Hates Ironforge.
+Currently she says nice things about Ironforge. I want all comments to be
+re-created to show a distaste for Ironforge and Dwarfs. One comment should be:
+"Smells like feet and malt liquor... Dwarfs are disgusting."
 
-Then go through her existing zone and subzone comments and fix the tone to match.
-Right now she praises Ironforge, which makes no sense if she hates it. Give her
-4 comments for Duskwood and 4 for Ironforge. The zone comments already fire on
-entry, so this is mostly about the data and the writing.
+I'd also like her to be excited about Duskwood (which is an awful place). One
+comment should read "Smells like death... I LOVE IT!".
 
-Examples of the tone I want:
-- Ironforge: "Smells like feet and malt liquor... Dwarfs are disgusting."
-- Duskwood: "Smells like death... I LOVE IT!"
-
-Also add Loves and Hates to the personality template, and update the
-personality-creator-project skill so it asks for them when creating a new
-personality and uses them to shape that character's comments.
+Make sure I have 4 comments for each zone.
