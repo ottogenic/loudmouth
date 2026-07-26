@@ -5,6 +5,11 @@ acceptance criteria, and scope boundary from the dispatched packet.
 
 ## Scope Discipline
 
+- Content-only edits (personality dialogue, zone/subzone lines, banter text) need NO new
+  automated tests: do not add test-writing steps or test-count acceptance criteria unless
+  the caller explicitly asks. The existing `luacheck .` + `./tests/ui-test.sh` gates are
+  the verification. (Observed: plans that ordered "focused regression tests" for dialogue
+  edits doubled the diff and produced buggy throwaway tests.)
 - Classify findings using the classification taxonomy delivered with your Return Contract.
 - Treat PRD gaps or broad release-hardening items as `future work` unless the dispatched acceptance
   criteria explicitly include them.
