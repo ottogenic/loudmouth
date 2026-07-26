@@ -1,12 +1,12 @@
-I need you to make a fix to the Human Female Warlock Professional personality.
+I have a feature requested for the Human Female Warlock Professional personality.
 
-Currently she says nice things about Ironforge. I want all comments to be
-re-created to show a distaste for Ironforge and Dwarfs. One comment should be:
+Currently she says nice things about "City of Ironforge". I want all comments to be
+re-created to show a distaste for "City of Ironforge" and Dwarfs. One comment should be:
 "Smells like feet and malt liquor... Dwarfs are disgusting."
 
 I'd also like her to be excited about Duskwood (which is an awful place). One
 comment should read "Smells like death... I LOVE IT!".
 
-Make sure I have 4 comments for each zone.
+Make sure I have 4 comments for the "City of Ironforge" and Duskwood zones.
 
 Treat this change as HIGH RISK.
