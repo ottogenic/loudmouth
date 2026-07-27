@@ -549,11 +549,16 @@ def slide_solution(step=None):
     if step is None:
         step = slide_solution.build_steps
 
+    def _retired(s):  # on the final step, struck lines fade to grey entirely
+        return "[grey][strike]" + re.sub(r"\[(?:/|[a-z]+)\]", "", s) + "[/][/]"
+
     def ko(s):  # click 4 knocks out the override branch (agents picked wrong)
+        if step >= 5:
+            return _retired(s)
         return "[strike]" + s + "[/]" if step >= 4 else s
 
     def ko2(s):  # final click rolls back skills ENTIRELY -- the loom lands
-        return "[strike]" + s + "[/]" if step >= 5 else s
+        return _retired(s) if step >= 5 else s
 
     inner = [
         ko2(" [grey]Before the task, load your role skill:[/]"),
@@ -588,13 +593,14 @@ def slide_solution(step=None):
             ko2("  [green]local[/]      [grey]<repo>/.agents/skills/[/][green]agent-code-extend[/][grey]/[/]"),
             "  [orange]override[/]   [grey]<repo>/.loom/skills/[/][orange]agent-code-instructions-override.md[/]"
             if step >= 5 else "",
-            "  [gold]default[/]    [grey]~/.config/otools/loom/skills/[/][gold]agent-code-instructions-default.md[/]"
+            "  [cyan]default[/]    [grey]~/.config/otools/loom/skills/[/][cyan]agent-code-instructions-default.md[/]"
             if step >= 5 else "",
-            "  [gold]local[/]      [grey]<repo>/.loom/skills/[/][gold]agent-code-instructions-local.md[/]"
+            "  [green]local[/]      [grey]<repo>/.loom/skills/[/][green]agent-code-instructions-local.md[/]"
             if step >= 5 else "",
         ),
         "",
-        "[grey]The Lua expert was there all along -- one overlay away.[/]",
+        "[grey]The Lua expert was there all along -- one overlay away.[/]"
+        if step >= 5 else "",
     ]
 
 
