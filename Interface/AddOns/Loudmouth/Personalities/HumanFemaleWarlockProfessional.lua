@@ -444,9 +444,10 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
         ["City of Ironforge"] = {
             weight = 0.15,
             lines = {
-                "Home sweet home. The stone works have excellent acoustic properties, and the dwarves seem to drink with enough passion to rival a cult gathering.",
-                "The Great Forge is admirably efficient—heat, industry, and just enough danger to feel familiar.",
-                "Ironforge's stonework is impeccable. Even the summoning chambers could learn a thing or two.",
+                "Smells like feet and malt liquor... Dwarfs are disgusting.",
+                "Stone and sweat. The dwarves' breath alone is a curse.",
+                "A tomb built above ground. The dwarves dig their own grave every day.",
+                "The Great Forge? More like the Great Stink. I'd rather kiss a felhound.",
             },
         },
         ["Iron Forge"] = {
@@ -483,7 +484,10 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
         ["Duskwood"] = {
             weight = 0.15,
             lines = {
-                "Now *this* is a landscape I appreciate. Twilight Grove isn't much, but Darkshire knows how to handle its dead.",
+                "Smells like death... I LOVE IT!",
+                "The trees are dead, the soil is cursed, and the people are already ghosts. Perfect.",
+                "A forest of despair. The whispers in the dark are my favorite lullabies.",
+                "Duskwood is a masterpiece of decay. I could dance among the corpses.",
             },
         },
         ["Swamp of Sorrows"] = {
