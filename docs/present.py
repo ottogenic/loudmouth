@@ -13,6 +13,8 @@ Stdlib only (no pip install). Left/Right arrows move between slides.
     g / Home                first slide
     G / End                 last slide
     1..9                    jump to slide N
+    + / -                   zoom in / out (cell zoom -- every glyph scales up)
+    0                       auto zoom (largest factor that fits the pane)
     q / Esc / Ctrl-C        quit
 
   Most slides have no build steps, so Left/Right just page through them. The
@@ -181,6 +183,80 @@ def compose(spans, width):
             used += len(take)
         pos += len(t)
     return "".join(out) + _reset()
+
+
+# ---------------------------------------------------------------------------
+# Cell zoom -- scale slides by an integer factor so text reads bigger on a
+# projector. A terminal app cannot change the terminal's font (tmux windows all
+# share one), so we scale in character cells: every glyph becomes a z-wide run
+# and every line repeats z times. Box-drawing arms extend with line characters
+# instead of repeating, so frames stay frames instead of stuttering corners.
+# ---------------------------------------------------------------------------
+
+ZOOM = None       # None = auto-fit (largest factor the pane can hold); int = fixed
+ZOOM_MAX = 3
+_LAST_ZOOM = 1    # effective factor of the last rendered frame (for +/- keys)
+
+# Horizontal: box/block chars extend with line/fill segments so frames stay
+# solid; everything else (prose) gets letterspacing, which reads far better
+# than doubled letters ("N o" vs "NNoo").
+_EXTEND_RIGHT = {"┌": "─", "└": "─", "├": "─", "┬": "─", "┴": "─", "┼": "─",
+                 "╭": "─", "╰": "─", "─": "─", "═": "═",
+                 "█": "█", "▀": "▀", "▄": "▄", "▟": "█", "▛": "█"}
+_EXTEND_LEFT = {"┐": "─", "┘": "─", "┤": "─", "╮": "─", "╯": "─",
+                "▙": "█", "▜": "█"}
+# Vertical: what a char contributes to the duplicated row(s) BELOW it. Side
+# borders and fills continue; text and horizontal rules leave clean air.
+_EXTEND_DOWN = {"│": "│", "║": "║", "┌": "│", "┐": "│", "├": "│", "┤": "│",
+                "┬": "│", "┼": "│", "╭": "│", "╮": "│",
+                "█": "█", "▟": "█", "▙": "█", "▄": "█"}
+
+
+def _hexpand(ch, z, pad_left=False):
+    if z == 1:
+        return ch
+    if ch in _EXTEND_RIGHT:
+        return ch + _EXTEND_RIGHT[ch] * (z - 1)
+    if ch in _EXTEND_LEFT:
+        return _EXTEND_LEFT[ch] * (z - 1) + ch
+    if ch == " ":
+        return " " * z
+    if pad_left:  # closing border glyph: align with ┐/┘ which pad left too
+        return " " * (z - 1) + ch
+    return ch + " " * (z - 1)  # prose: letterspaced, not doubled
+
+
+def zoom_canvas(canvas, z):
+    """Scale a list of span-lines by integer factor z. Structure-aware:
+    borders/fills scale as shapes, prose is letterspaced with blank rows."""
+    if z <= 1:
+        return canvas
+    out = []
+    for spans in canvas:
+        # the line's LAST non-space char is its right edge: pad it left so a
+        # closing │ lands in the same column as the ┐/┘ above and below it
+        plain = "".join(t for _, t in spans)
+        last = len(plain.rstrip()) - 1
+        scaled = []
+        pos = 0
+        for a, t in spans:
+            scaled.append((a, "".join(
+                _hexpand(c, z, pad_left=(pos + k == last and c in "│║"))
+                for k, c in enumerate(t))))
+            pos += len(t)
+        out.append(scaled)
+        cont = [(a, "".join(_EXTEND_DOWN.get(c, " ") for c in t))
+                for a, t in scaled]
+        for _ in range(z - 1):
+            out.append(cont)
+    return out
+
+
+def fit_zoom(canvas, cols, body_rows):
+    """Largest factor (1..ZOOM_MAX) at which the slide still fits the pane."""
+    w = max((plain_len(sp) for sp in canvas), default=1) or 1
+    h = len(canvas) or 1
+    return max(1, min(ZOOM_MAX, cols // w, body_rows // h))
 
 
 # ---------------------------------------------------------------------------
@@ -596,12 +672,12 @@ def slide_runbook(step=None):
     # is one build stage; the ABCDE table and the closing line are the next two.
     # Hidden stages leave equal-height blanks so the title never shifts.
     pipeline = [
-        "[grey]\"perform an agent runbook review\"[/]",
+        "[grey]\"perform a session review\"[/]",
         "",
         "[white]AGENTS.md[/] [grey]·[/] [white]REVIEW.md[/] [grey]·[/] [white].agents/skills/*[/] [grey]·[/] [white]session log [grey](sqlite)[/]",
         "[grey]│[/]",
         "[grey]▼[/]",
-        A(*box(["  [b][cyan]RUNBOOK REVIEW[/][/]  "], iw=18, color="cyan", lead="")),
+        A(*box(["  [b][cyan]SESSION REVIEW[/][/]  "], iw=18, color="cyan", lead="")),
         "[grey]│[/]",
         "[grey]▼[/]",
     ]
@@ -619,7 +695,7 @@ def slide_runbook(step=None):
         return [""] * rows
 
     return [
-        "[gold][b]THE agent-runbook-review SKILL[/][/]",
+        "[gold][b]THE session-review SKILL[/][/]",
         "[grey]a periodic self-maintenance pass[/]",
         "",
         *(pipeline if step >= 1 else blanks(pipeline)),
@@ -680,10 +756,12 @@ def slide_entries(index, step):
 def footer_line(index, cols, step=0, steps=0):
     dots = "".join("●" if k == index else "○" for k in range(N))
     build = f"[cyan]←→ build {min(step, steps)}/{steps}[/]   " if steps else ""
+    zoom = (f"[gold]{_LAST_ZOOM}x[/][grey]{'' if ZOOM else ' auto'}[/]   "
+            if (_LAST_ZOOM > 1 or ZOOM) else "")
     mk = (
         f"[red]loudmouth[/]    [grey]{dots}[/]    "
         f"[white][b]{index + 1}[/][/][grey]/{N}[/]    "
-        f"{build}[d]◀ prev   next ▶   ·   q quit[/]"
+        f"{build}{zoom}[d]◀ prev   next ▶   ·   +/- zoom   ·   q quit[/]"
     )
     return compose(parse_markup(mk), cols)
 
@@ -708,9 +786,14 @@ def _layout_block(entries):
 
 
 def frame_lines(index, cols, rows, step=0):
+    global _LAST_ZOOM
     canvas = _layout_block(slide_entries(index, step))
     reserve = 2 if rows >= 9 else 0  # blank spacer + footer
     body_rows = max(1, rows - reserve)
+
+    z = ZOOM if ZOOM else fit_zoom(canvas, cols, body_rows)
+    _LAST_ZOOM = z
+    canvas = zoom_canvas(canvas, z)
 
     n = len(canvas)
     if n >= body_rows:
@@ -762,11 +845,18 @@ def enable_win_vt():
 STEP_NEXT, STEP_PREV = "STEP_NEXT", "STEP_PREV"      # Right / Left
 SLIDE_NEXT, SLIDE_PREV = "SLIDE_NEXT", "SLIDE_PREV"  # Down / Up
 FIRST, LAST, QUIT = "FIRST", "LAST", "QUIT"
+ZOOM_IN, ZOOM_OUT, ZOOM_AUTO = "ZOOM_IN", "ZOOM_OUT", "ZOOM_AUTO"  # + / - / 0
 
 
 def _decode_unix(data):
     if data in (b"q", b"Q", b"\x1b", b"\x03"):
         return QUIT
+    if data in (b"+", b"="):                                     # + (also unshifted =)
+        return ZOOM_IN
+    if data in (b"-", b"_"):
+        return ZOOM_OUT
+    if data == b"0":
+        return ZOOM_AUTO
     if data in (b"\x1b[C", b"\x1bOC", b"l", b" ", b"\r"):       # Right / l / space
         return STEP_NEXT
     if data in (b"\x1b[D", b"\x1bOD", b"h"):                     # Left / h
@@ -792,6 +882,12 @@ def _decode_win(ch, ch2=None):
                 "G": FIRST, "O": LAST}.get(ch2)
     if ch in ("q", "Q", "\x1b", "\x03"):
         return QUIT
+    if ch in ("+", "="):
+        return ZOOM_IN
+    if ch in ("-", "_"):
+        return ZOOM_OUT
+    if ch == "0":
+        return ZOOM_AUTO
     if ch in ("l", " ", "\r"):
         return STEP_NEXT
     if ch == "h":
@@ -860,13 +956,14 @@ def run_interactive(start):
     out.write("\x1b[?1049h\x1b[?25l")  # alt screen, hide cursor
     out.flush()
 
+    global ZOOM
     index = max(0, min(N - 1, start))
     step = 0
     last = None
     try:
         while True:
             cols, rows = get_size()
-            state = (index, step, cols, rows)
+            state = (index, step, cols, rows, ZOOM)
             if state != last:
                 buf = "\x1b[H" + "\r\n".join(frame_lines(index, cols, rows, step))
                 buf += _reset()
@@ -880,6 +977,12 @@ def run_interactive(start):
             m = max_steps(index)
             if key == QUIT:
                 break
+            elif key == ZOOM_IN:             # pin zoom one step above what's shown
+                ZOOM = min(ZOOM_MAX, _LAST_ZOOM + 1)
+            elif key == ZOOM_OUT:
+                ZOOM = max(1, _LAST_ZOOM - 1)
+            elif key == ZOOM_AUTO:
+                ZOOM = None
             elif key == STEP_NEXT:           # Down: next build step, else next slide
                 if step < m:
                     step += 1
@@ -943,7 +1046,13 @@ def main():
                     help="start on slide N (1-based)")
     ap.add_argument("--color", action="store_true", help="force color in --dump")
     ap.add_argument("--no-color", action="store_true", help="disable color")
+    ap.add_argument("--zoom", type=int, default=None, choices=(1, 2, 3),
+                    help="fixed cell-zoom factor (default: auto-fit the pane)")
     args = ap.parse_args()
+
+    global ZOOM
+    if args.zoom:
+        ZOOM = args.zoom
 
     try:
         sys.stdout.reconfigure(encoding="utf-8")
