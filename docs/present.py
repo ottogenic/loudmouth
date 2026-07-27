@@ -586,6 +586,8 @@ def slide_solution(step=None):
             ko("  [orange]override[/]   [grey]<repo>/.agents/skills/[/][orange]agent-code-override[/][grey]/[/]"),
             ko2("  [cyan]global[/]     [grey]~/.config/opencode/skills/[/][cyan]agent-code[/][grey]/[/]"),
             ko2("  [green]local[/]      [grey]<repo>/.agents/skills/[/][green]agent-code-extend[/][grey]/[/]"),
+            "  [orange]override[/]   [grey]<repo>/.loom/skills/[/][orange]agent-code-instructions-override.md[/]"
+            if step >= 5 else "",
             "  [gold]default[/]    [grey]~/.config/otools/loom/skills/[/][gold]agent-code-instructions-default.md[/]"
             if step >= 5 else "",
             "  [gold]local[/]      [grey]<repo>/.loom/skills/[/][gold]agent-code-instructions-local.md[/]"
