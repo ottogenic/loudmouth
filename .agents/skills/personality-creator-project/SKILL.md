@@ -33,6 +33,14 @@ Loudmouth = Loudmouth or {}
 Loudmouth._RawPersonalities = Loudmouth._RawPersonalities or {}
 
 Loudmouth._RawPersonalities["<Race><Gender><Class><Personality>"] = {
+    likes = {
+        zones = { "graveyard", "cave" },
+        entities = { ["gnome"] = { weight = 1/20, lines = { "...", "...", "..." } } },
+    },
+    hates = {
+        zones = { "dwarf" },
+        entities = { ["dwarf"] = { weight = 1/20, lines = { "...", "...", "..." } } },
+    },
     actions = {
         ["Spell Name"] = {
             weight = 1/100,           -- probability per macro press (see weights below)
@@ -70,6 +78,13 @@ Loudmouth._RawPersonalities["<Race><Gender><Class><Personality>"] = {
 5. **Pet coverage.** Add a bucket per pet the class uses (Hunter: gorilla, cat, bat, …;
    Warlock: imp, voidwalker, …). Long-term goal is all pet types per class.
 6. **No API calls in personality files** -- they are pure data tables only.
+7. **Zone preferences are authoring traits, not dialogue pools.** Match each
+   zone/subzone against race and vibe metadata, then write tailored lines under
+   that exact location. Include every overlap; if a liked cave is in a hated
+   dwarf location, acknowledge both while keeping the overall tone negative.
+   Entity keys match the selected target's name, race, class, and creature type.
+   Entity entries may set a `weight`; without one they inherit the action weight.
+   Hates take precedence over likes; more-specific (longer) keys win ties.
 
 ## Wiring a new file in
 

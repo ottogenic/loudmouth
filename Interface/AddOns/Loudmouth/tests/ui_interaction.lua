@@ -99,3 +99,184 @@ test("every banter line fits the SendChatMessage 255-char game limit", function(
     end
     assertTrue(count > 0, "no personalities registered to check")
 end)
+
+test("Classic metadata covers Era zones, instances, and parent-scoped subzones", function()
+    assertNotNil(Loudmouth.ClassicZones[1411])
+    assertEquals("Durotar", Loudmouth.ClassicZones[1411].name)
+    assertEquals("Ironforge", Loudmouth.ClassicZones[1455].name)
+    assertEquals("Uldaman", Loudmouth.ClassicInstances[1337])
+    assertTrue(#Loudmouth.ClassicSubzones["Dun Morogh"] > 10)
+    assertTrue(#Loudmouth.ClassicSubzones["Duskwood"] > 10)
+    assertEquals(3, Loudmouth.ZoneRaceMetadata["Ironforge"].dwarf)
+end)
+
+test("zone preferences match race and vibe metadata", function()
+    local personality = {
+        likes = { zones = { "graveyard", "cave" } },
+        hates = { zones = { "dwarf" } },
+    }
+
+    local likes, hates = Loudmouth.GetLocationPreferences(personality, "City of Ironforge", "The Great Forge")
+    assertEquals(0, #likes)
+    assertEquals("dwarf", hates[1])
+
+    likes, hates = Loudmouth.GetLocationPreferences(personality, "Duskwood", "Raven Hill Cemetery")
+    assertEquals("graveyard", likes[1])
+    assertEquals(0, #hates)
+
+    likes, hates = Loudmouth.GetLocationPreferences(personality, "Uldaman", "The Map Chamber")
+    assertEquals("cave", likes[1])
+    assertEquals("dwarf", hates[1])
+
+    likes, hates = Loudmouth.GetLocationPreferences(personality, "Mulgore", "Bloodhoof Village")
+    assertEquals(0, #likes)
+    assertEquals(0, #hates)
+
+    likes, hates = Loudmouth.GetLocationPreferences(personality, "Mulgore", "Bael'dun Digsite")
+    assertEquals(0, #likes)
+    assertEquals("dwarf", hates[1])
+end)
+
+test("zone traits have no generic dialogue and exact locations own their comments", function()
+    local personality = {
+        zones = {
+            ["City of Ironforge"] = { lines = { "Specific city line" } },
+        },
+        hates = { zones = { "dwarf" } },
+    }
+
+    local line, source = Loudmouth.GetZoneBanterFromTexts(personality, "Ironforge", "The Great Forge")
+    assertEquals("Specific city line", line)
+    assertEquals("zone", source)
+end)
+
+test("parent-scoped subzone comments are selected only for subzone events", function()
+    local personality = {
+        zones = {
+            ["Dun Morogh"] = { lines = { "Zone line" } },
+        },
+        subzones = {
+            ["Dun Morogh"] = {
+                ["The Grizzled Den"] = { lines = { "Specific cave and dwarf line" } },
+            },
+        },
+    }
+
+    local line = Loudmouth.GetZoneBanterFromTexts(personality, "Dun Morogh", "The Grizzled Den", "subzone")
+    assertEquals("Specific cave and dwarf line", line)
+
+    line = Loudmouth.GetZoneBanterFromTexts(personality, "Dun Morogh", "The Grizzled Den", "zone")
+    assertEquals("Zone line", line)
+end)
+
+test("literal zone keys beat longer aliases", function()
+    local personality = {
+        zones = {
+            ["City of Ironforge"] = { lines = { "Alias city line" } },
+            ["Iron Forge"] = { lines = { "Literal city line" } },
+        },
+    }
+
+    local line = Loudmouth.GetZoneBanterFromTexts(personality, "Iron Forge", "")
+    assertEquals("Literal city line", line)
+end)
+
+test("entity preferences inspect name class race and creature type", function()
+    local personality = {
+        likes = {
+            entities = {
+                ["gnome"] = { weight = 1 / 20, lines = { "Gnome like" } },
+                ["mechanical"] = { lines = { "Machine like" } },
+            },
+        },
+        hates = {
+            entities = {
+                ["dwarf"] = { lines = { "Dwarf hate" } },
+                ["dark iron dwarf"] = { lines = { "Dark Iron hate" } },
+            },
+        },
+    }
+
+    local line, source, key = Loudmouth.GetTargetBanter(personality, { name = "Dark Iron Dwarf" })
+    assertEquals("Dark Iron hate", line)
+    assertEquals("hate-entity", source)
+    assertEquals("dark iron dwarf", key)
+
+    local result = { Loudmouth.GetTargetBanter(personality, { race = "Gnome" }) }
+    assertEquals("Gnome like", result[1])
+    assertEquals(1 / 20, result[4])
+
+    line = Loudmouth.GetTargetBanter(personality, { creatureType = "Mechanical" })
+    assertEquals("Machine like", line)
+
+    line = Loudmouth.GetTargetBanter(personality, { name = "Gnome Dwarf" })
+    assertEquals("Dwarf hate", line)
+end)
+
+test("macro target context is limited to spells that act on selected units", function()
+    local drainBody = Loudmouth.BuildMacroBody("Drain Life", "Drain Life")
+    assertContains(drainBody, 'Loudmouth.Trigger("Drain Life","target")')
+
+    local armorBody = Loudmouth.BuildMacroBody("Demon Armor", "Demon Armor")
+    assertContains(armorBody, 'Loudmouth.Trigger("Demon Armor")')
+    assertFalse(string.find(armorBody, '"target"', 1, true) ~= nil)
+
+    local createBody = Loudmouth.BuildMacroBody("Create Healthstone", "Create Healthstone (Major)")
+    assertContains(createBody, 'Loudmouth.Trigger("Create Healthstone")')
+    assertFalse(string.find(createBody, '"target"', 1, true) ~= nil)
+end)
+
+test("healthstone and soulstone macro bodies handle every Classic tier", function()
+    local healingBody = Loudmouth.BuildMacroBody("Healing Items")
+    assertContains(healingBody, "/use Major Healthstone")
+    assertContains(healingBody, "/use Minor Healthstone")
+    assertFalse(string.find(healingBody, "/castsequence", 1, true) ~= nil)
+    assertTrue(#healingBody <= 255)
+
+    local soulstoneBody = Loudmouth.BuildMacroBody("Soulstone", "Create Soulstone (Major)")
+    assertContains(soulstoneBody, "/use Major Soulstone")
+    assertContains(soulstoneBody, "/use Minor Soulstone")
+    assertContains(soulstoneBody, "/cast Create Soulstone (Major)")
+    assertContains(soulstoneBody, 'Loudmouth.Trigger("Soulstone","target")')
+    assertTrue(#soulstoneBody <= 255)
+end)
+
+test("Warlock macro order and personality actions remain in parity", function()
+    local order = Loudmouth.ActionOrderByClass.Warlock
+    local ordered = {}
+    for _, action in ipairs(order) do ordered[action] = true end
+
+    assertTrue(ordered["Drain Life"])
+    assertTrue(ordered["Drain Soul"])
+    assertTrue(ordered["Create Healthstone"])
+    assertFalse(ordered["Generic"] == true)
+
+    local personality = Loudmouth.Personalities["HumanFemaleWarlockProfessional"]
+    assertNotNil(personality)
+    assertEquals(1 / 20, personality.likes.entities.gnome.weight)
+    assertEquals(1 / 20, personality.hates.entities.dwarf.weight)
+    for _, action in ipairs(order) do
+        local entry = personality.actions[action]
+        assertNotNil(entry, "missing personality action: " .. action)
+        assertTrue(type(entry.lines) == "table" and #entry.lines > 0, "empty personality action: " .. action)
+    end
+    for action in pairs(personality.actions) do
+        assertTrue(action == "Generic" or ordered[action] == true, "action has no generated macro: " .. action)
+    end
+end)
+
+test("zone comments are complete utterances rather than split continuations", function()
+    local personality = Loudmouth.Personalities["HumanFemaleWarlockProfessional"]
+    local fragments = {
+        "An entire city preserved in undeath.",
+        "A chaotic masterpiece perfectly suited for my craft.",
+        "However, Zul'Farrak offers plenty of ancient curses to study.",
+    }
+    for _, zone in pairs(personality.zones) do
+        for _, line in ipairs(zone.lines or {}) do
+            for _, fragment in ipairs(fragments) do
+                assertNotEquals(fragment, line)
+            end
+        end
+    end
+end)

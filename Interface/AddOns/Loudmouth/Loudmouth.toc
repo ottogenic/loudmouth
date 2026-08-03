@@ -9,6 +9,7 @@
 # CopyChat first so its error handler is installed before any other Loudmouth
 # file loads -- this captures load-time errors in the files below.
 CopyChat.lua
+ClassicMetadata.lua
 Personalities/HumanFemaleWarlockProfessional.lua
 Loudmouth.lua
 UI.lua

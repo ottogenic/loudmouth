@@ -53,7 +53,30 @@ Loudmouth.ActionOrderByClass = Loudmouth.ActionOrderByClass or {
         "Soulstone",
         "Subjugate Demon",
         "Healing Items",
-        "Generic",
+        -- Keep new actions appended so existing LM_01..LM_33 action-bar slots
+        -- retain their meaning across addon upgrades.
+        "Drain Soul",
+        "Demon Skin",
+        "Create Healthstone",
+        "Health Funnel",
+        "Ritual of Summoning",
+        "Shadow Ward",
+        "Create Firestone",
+        "Create Spellstone",
+        "Sense Demons",
+        "Detect Invisibility",
+        "Summon Incubus",
+        "Warlock Mount",
+        -- Talent-granted castable abilities are skipped unless learned.
+        "Amplify Curse",
+        "Curse of Exhaustion",
+        "Siphon Life",
+        "Dark Pact",
+        "Fel Domination",
+        "Demonic Sacrifice",
+        "Soul Link",
+        "Shadowburn",
+        "Conflagrate",
     },
     ["Hunter"] = {
         "Auto Shot",
@@ -67,47 +90,285 @@ Loudmouth.ActionOrderByClass = Loudmouth.ActionOrderByClass or {
     },
 }
 
+-- ClassicMetadata.lua normally initializes this before the core loads.
+Loudmouth.ZoneAliases = Loudmouth.ZoneAliases or {}
+
 -- ============================================================================
--- Zone alias mapping — locale-aware canonical zone names → common aliases
--- Used by Trigger() for stable fuzzy matching.
+-- Context matching helpers -- shared by location and target banter
 -- ============================================================================
-Loudmouth.ZoneAliases = Loudmouth.ZoneAliases or {
-    -- Capital cities
-    ["Ironforge"] = { "City of Ironforge", "Iron Forge" },
-    ["Stormwind City"] = { "Stormwind" },
-    ["Orgrimmar"] = { "Orgrimar" },
-    ["Thunder Bluff"] = { "Thunder" },
-    ["Undercity"] = { "Under" },
-    ["Darnassus"] = { "Teldrassil" },
-    ["Shattrath City"] = { "Shattrath", "Shat" },
-    ["Exodar"] = { "Exo" },
-    ["Silvermoon City"] = { "Silvermoon" },
-    -- Key zones / dungeons
-    ["Raven Hill Cemetery"] = { "Raven Hill", "Raven Hill Cremation" },
-    ["Raven Hill"] = { "Raven" },
-    ["Camp Narache"] = { "Narache" },
-    ["Camp Taurajo"] = { "Taurajo" },
-    ["Thorn Hill"] = { "Thorn" },
-    ["The Crossroads"] = { "Crossroads" },
-    -- Classic dungeons / instances
-    ["Deadmines"] = { "DM" },
-    ["Wailing Caverns"] = { "WC" },
-    ["Shadowfang Keep"] = { "SFK" },
-    ["Stockade"] = { "The Stockade", "Stormwind Stockade" },
-    ["Ridgepoint Tower"] = { "Ridgepoint" },
-    ["Elwynn Forest"] = { "Elwynn" },
-    ["Duskwood"] = { "Dusk" },
-    ["Redridge Mountains"] = { "Redridge" },
-    ["Badlands"] = { "Bad" },
-    ["Wetlands"] = { "Wet" },
-    ["Hinterlands"] = { "Hinter" },
-    ["Searing Gorge"] = { "Searing" },
-    ["Blasted Lands"] = { "Blasted" },
-    ["Swamp of Sorrows"] = { "Swamp" },
-    ["Stranglethorn Vale"] = { "Stranglethorn", "STV" },
-    ["Loch Modan"] = { "Modan" },
-    ["Dun Morogh"] = { "Dun Mor" },
-}
+
+local function NormalizeContextText(value)
+    if type(value) ~= "string" then return "" end
+    return string.lower(value)
+end
+
+local function HasEntryLines(entry)
+    local lines = type(entry) == "table" and entry.lines
+    return type(lines) == "table" and #lines > 0
+end
+
+local function PickEntryLine(entry)
+    if not HasEntryLines(entry) then return nil end
+    local lines = entry.lines
+    return lines[math.random(#lines)]
+end
+
+local function CollectSortedKeys(bucket)
+    local keys = {}
+    if type(bucket) ~= "table" then return keys end
+
+    for key, entry in pairs(bucket) do
+        if type(key) == "string" and key ~= "" and HasEntryLines(entry) then
+            keys[#keys + 1] = key
+        end
+    end
+    table.sort(keys, function(a, b)
+        if #a == #b then return a < b end
+        return #a > #b
+    end)
+    return keys
+end
+
+local function FindKeywordMatch(bucket, texts)
+    for _, key in ipairs(CollectSortedKeys(bucket)) do
+        local needle = NormalizeContextText(key)
+        for _, text in ipairs(texts or {}) do
+            local haystack = NormalizeContextText(text)
+            if haystack ~= "" and string.find(haystack, needle, 1, true) then
+                return PickEntryLine(bucket[key]), key, bucket[key]
+            end
+        end
+    end
+end
+
+local ZoneNameIndex
+
+local function BuildZoneNameIndex()
+    local index = {}
+    for _, data in pairs(Loudmouth.ClassicZones or {}) do
+        if type(data) == "table" and type(data.name) == "string" then
+            index[NormalizeContextText(data.name)] = data.name
+        end
+    end
+    for _, name in pairs(Loudmouth.ClassicInstances or {}) do
+        if type(name) == "string" then
+            index[NormalizeContextText(name)] = name
+        end
+    end
+    for canonical, aliases in pairs(Loudmouth.ZoneAliases or {}) do
+        index[NormalizeContextText(canonical)] = canonical
+        for _, alias in ipairs(aliases) do
+            index[NormalizeContextText(alias)] = canonical
+        end
+    end
+    return index
+end
+
+function Loudmouth.GetCanonicalZoneName(zoneName)
+    if not ZoneNameIndex then ZoneNameIndex = BuildZoneNameIndex() end
+    return ZoneNameIndex[NormalizeContextText(zoneName)]
+end
+
+local function AddContextTerm(terms, seen, value)
+    local normalized = NormalizeContextText(value)
+    if normalized ~= "" and not seen[normalized] then
+        terms[#terms + 1] = value
+        seen[normalized] = true
+    end
+end
+
+local function AddTagList(terms, seen, tags, minimumStrength)
+    if type(tags) ~= "table" then return end
+    for key, value in pairs(tags) do
+        if type(key) == "number" then
+            AddContextTerm(terms, seen, value)
+        elseif value and (type(value) ~= "number" or not minimumStrength or value >= minimumStrength) then
+            AddContextTerm(terms, seen, key)
+        end
+    end
+end
+
+local function FindSubzoneTags(metadata, canonicalZone, subZone)
+    local zoneData = type(metadata) == "table" and metadata[canonicalZone]
+    if type(zoneData) ~= "table" then return nil end
+
+    local normalizedSubzone = NormalizeContextText(subZone)
+    for name, tags in pairs(zoneData) do
+        if NormalizeContextText(name) == normalizedSubzone then return tags end
+    end
+end
+
+function Loudmouth.GetLocationContextTerms(realZone, subZone)
+    local terms, seen = {}, {}
+    local canonicalZone = Loudmouth.GetCanonicalZoneName(realZone) or realZone
+
+    AddContextTerm(terms, seen, realZone)
+    AddContextTerm(terms, seen, subZone)
+    AddContextTerm(terms, seen, canonicalZone)
+    -- Strength-1 race tags describe a local camp or ruin, not the whole zone.
+    AddTagList(terms, seen, (Loudmouth.ZoneRaceMetadata or {})[canonicalZone], 2)
+    AddTagList(terms, seen, (Loudmouth.ZoneVibeMetadata or {})[canonicalZone])
+    AddTagList(terms, seen, FindSubzoneTags(Loudmouth.SubzoneRaceMetadata, canonicalZone, subZone))
+    AddTagList(terms, seen, FindSubzoneTags(Loudmouth.SubzoneVibeMetadata, canonicalZone, subZone))
+
+    return terms, canonicalZone
+end
+
+local function CollectPreferenceTraits(bucket)
+    local traits = {}
+    if type(bucket) ~= "table" then return traits end
+
+    for key, value in pairs(bucket) do
+        local trait
+        if type(key) == "number" and type(value) == "string" then
+            trait = value
+        elseif type(key) == "string" and value == true then
+            trait = key
+        end
+        if trait and trait ~= "" then traits[#traits + 1] = trait end
+    end
+    table.sort(traits, function(a, b)
+        if #a == #b then return a < b end
+        return #a > #b
+    end)
+    return traits
+end
+
+local function FindPreferenceTraits(bucket, contextTerms)
+    local matches = {}
+    for _, trait in ipairs(CollectPreferenceTraits(bucket)) do
+        local needle = NormalizeContextText(trait)
+        for _, term in ipairs(contextTerms) do
+            if string.find(NormalizeContextText(term), needle, 1, true) then
+                matches[#matches + 1] = trait
+                break
+            end
+        end
+    end
+    return matches
+end
+
+function Loudmouth.GetLocationPreferences(personality, realZone, subZone)
+    if type(personality) ~= "table" then return {}, {} end
+    local contextTerms = Loudmouth.GetLocationContextTerms(realZone, subZone)
+    local likes = personality.likes and personality.likes.zones
+    local hates = personality.hates and personality.hates.zones
+    return FindPreferenceTraits(likes, contextTerms), FindPreferenceTraits(hates, contextTerms)
+end
+
+local function FindAuthoredZoneLine(personality, realZone)
+    if type(personality.zones) ~= "table" then return nil end
+
+    local realCanonical = Loudmouth.GetCanonicalZoneName(realZone)
+    local exactEntry = personality.zones[realZone]
+    if HasEntryLines(exactEntry) then
+        return PickEntryLine(exactEntry), "zone", realZone
+    end
+
+    for _, zoneName in ipairs(CollectSortedKeys(personality.zones)) do
+        if NormalizeContextText(zoneName) == NormalizeContextText(realZone) then
+            return PickEntryLine(personality.zones[zoneName]), "zone", zoneName
+        end
+    end
+
+    for _, zoneName in ipairs(CollectSortedKeys(personality.zones)) do
+        local zoneCanonical = Loudmouth.GetCanonicalZoneName(zoneName)
+        if realCanonical and zoneCanonical == realCanonical then
+            return PickEntryLine(personality.zones[zoneName]), "zone", zoneName
+        end
+    end
+
+    if realZone ~= "" then
+        for _, zoneName in ipairs(CollectSortedKeys(personality.zones)) do
+            local zoneNeedle = NormalizeContextText(zoneName)
+            local haystack = NormalizeContextText(realZone)
+            if string.find(haystack, zoneNeedle, 1, true) or string.find(zoneNeedle, haystack, 1, true) then
+                return PickEntryLine(personality.zones[zoneName]), "zone", zoneName
+            end
+        end
+    end
+end
+
+local function FindAuthoredSubzoneLine(personality, realZone, subZone)
+    if type(personality.subzones) ~= "table" or subZone == "" then return nil end
+
+    local canonicalZone = Loudmouth.GetCanonicalZoneName(realZone) or realZone
+    local scoped = personality.subzones[canonicalZone]
+    local line, key = FindKeywordMatch(scoped, { subZone })
+    if line then return line, "subzone", key end
+
+    -- Flat keys remain available for broad features such as inns.
+    line, key = FindKeywordMatch(personality.subzones, { subZone })
+    if line then return line, "subzone", key end
+end
+
+
+function Loudmouth.GetZoneBanterFromTexts(personality, realZone, subZone, locationKind)
+    if type(personality) ~= "table" then return nil end
+
+    realZone = type(realZone) == "string" and realZone or ""
+    subZone = type(subZone) == "string" and subZone or ""
+
+    if locationKind == "subzone" then
+        return FindAuthoredSubzoneLine(personality, realZone, subZone)
+    end
+    if locationKind == "zone" then
+        return FindAuthoredZoneLine(personality, realZone)
+    end
+
+    local line, source, key = FindAuthoredSubzoneLine(personality, realZone, subZone)
+    if line then return line, source, key end
+    return FindAuthoredZoneLine(personality, realZone)
+end
+
+function Loudmouth.GetEntityTexts(targetUnit)
+    local texts = {}
+    local function add(value)
+        if type(value) == "string" and value ~= "" then texts[#texts + 1] = value end
+    end
+
+    -- A table context keeps the matcher deterministic and directly testable.
+    if type(targetUnit) == "table" then
+        for _, value in ipairs(targetUnit.texts or {}) do add(value) end
+        add(targetUnit.name)
+        add(targetUnit.class)
+        add(targetUnit.race)
+        add(targetUnit.creatureType)
+        return texts
+    end
+
+    if type(targetUnit) ~= "string" or targetUnit == "" then return texts end
+    if type(UnitExists) == "function" and not UnitExists(targetUnit) then return texts end
+
+    if type(UnitName) == "function" then add(UnitName(targetUnit)) end
+    if type(UnitCreatureType) == "function" then add(UnitCreatureType(targetUnit)) end
+    if type(UnitRace) == "function" then
+        local raceName, raceFile = UnitRace(targetUnit)
+        add(raceName)
+        add(raceFile)
+    end
+    if type(UnitClass) == "function" then
+        local className, classFile = UnitClass(targetUnit)
+        add(className)
+        add(classFile)
+    end
+    return texts
+end
+
+function Loudmouth.GetEntityBanterFromTexts(personality, texts)
+    if type(personality) ~= "table" then return nil end
+
+    local hateEntities = personality.hates and personality.hates.entities
+    local likeEntities = personality.likes and personality.likes.entities
+    local line, key, entry = FindKeywordMatch(hateEntities, texts)
+    if line then return line, "hate-entity", key, entry.weight end
+    line, key, entry = FindKeywordMatch(likeEntities, texts)
+    if line then return line, "like-entity", key, entry.weight end
+end
+
+function Loudmouth.GetTargetBanter(personality, targetUnit)
+    return Loudmouth.GetEntityBanterFromTexts(personality, Loudmouth.GetEntityTexts(targetUnit))
+end
 
 -- ============================================================================
 -- Spell name resolver — handles locale/alias mismatches for GetSpellInfo
@@ -119,11 +380,75 @@ local SpellAliasMap = {
     ["Multishot"] = "Multi-Shot",
 }
 
+-- Classic stone, detection, and mount spells use separately trained names
+-- rather than ranks of one spell. Resolve the highest learned variant.
+local SpellCandidateMap = {
+    ["Soulstone"] = {
+        "Create Soulstone (Major)", "Create Soulstone (Greater)", "Create Soulstone",
+        "Create Soulstone (Lesser)", "Create Soulstone (Minor)",
+    },
+    ["Create Healthstone"] = {
+        "Create Healthstone (Major)", "Create Healthstone (Greater)", "Create Healthstone",
+        "Create Healthstone (Lesser)", "Create Healthstone (Minor)",
+    },
+    ["Create Firestone"] = {
+        "Create Firestone (Major)", "Create Firestone (Greater)", "Create Firestone", "Create Firestone (Lesser)",
+    },
+    ["Create Spellstone"] = {
+        "Create Spellstone (Major)", "Create Spellstone (Greater)", "Create Spellstone",
+    },
+    ["Detect Invisibility"] = {
+        "Detect Greater Invisibility", "Detect Invisibility", "Detect Lesser Invisibility",
+    },
+    ["Warlock Mount"] = { "Summon Dreadsteed", "Summon Felsteed" },
+}
+
+-- Only these actions meaningfully act on the selected unit. Self, pet, area,
+-- ground-targeted, and item-creation spells must not produce target banter.
+Loudmouth.TargetedActions = {
+    ["Shadow Bolt"] = true,
+    ["Immolate"] = true,
+    ["Corruption"] = true,
+    ["Curse of Weakness"] = true,
+    ["Curse of Agony"] = true,
+    ["Curse of Recklessness"] = true,
+    ["Curse of Tongues"] = true,
+    ["Curse of the Elements"] = true,
+    ["Curse of Shadow"] = true,
+    ["Curse of Doom"] = true,
+    ["Searing Pain"] = true,
+    ["Soul Fire"] = true,
+    ["Drain Life"] = true,
+    ["Drain Mana"] = true,
+    ["Drain Soul"] = true,
+    ["Fear"] = true,
+    ["Banish"] = true,
+    ["Death Coil"] = true,
+    ["Soulstone"] = true,
+    ["Subjugate Demon"] = true,
+    ["Unending Breath"] = true,
+    ["Ritual of Summoning"] = true,
+    ["Detect Invisibility"] = true,
+    ["Curse of Exhaustion"] = true,
+    ["Siphon Life"] = true,
+    ["Shadowburn"] = true,
+    ["Conflagrate"] = true,
+}
+
 --- Resolve a spell/action key to a valid spell name for GetSpellInfo.
 -- 1. Try the key directly.
 -- 2. Try any alias mapping.
 -- Returns the spell name or nil.
 function Loudmouth._ResolveSpellName(key)
+    local candidates = SpellCandidateMap[key]
+    if candidates then
+        for _, candidate in ipairs(candidates) do
+            local name = GetSpellInfo(candidate)
+            if name then return name end
+        end
+        return nil
+    end
+
     -- Direct lookup
     local name = GetSpellInfo(key)
     if name then return name end
@@ -307,7 +632,7 @@ local function SafeSendChat(msg, chatType)
     SendChatMessage(msg, chatType or "SAY")
 end
 
-function Loudmouth.Trigger(action)
+function Loudmouth.Trigger(action, targetUnit)
     -- ========================================================================
     -- Localization Strategy (English-first)
     -- This addon targets English locales (enUS, enGB) for zone matching.
@@ -330,11 +655,6 @@ function Loudmouth.Trigger(action)
         return
     end
 
-    local now = GetTime()
-    if Loudmouth.Cooldowns[action] and (now - Loudmouth.Cooldowns[action] < Loudmouth.CooldownTime) then
-        return
-    end
-
     local personalityName = Loudmouth.CurrentPersonality
     local personality = Loudmouth.Personalities[personalityName]
 
@@ -349,119 +669,73 @@ function Loudmouth.Trigger(action)
     if Loudmouth.ShowZoneDebug then
         local realZone = GetRealZoneText()
         local subZone = GetSubZoneText() or ""
+        local pendingKind = Loudmouth.PendingZoneComment and "zone"
+            or (Loudmouth.PendingSubzoneComment and "subzone" or "none")
+        local likes, hates = Loudmouth.GetLocationPreferences(personality, realZone, subZone)
         print(string.format(
-            "|cFF99CCFF[LM ZDebug]|r Zone='%s' | Sub='%s' | Pending=%s",
+            "|cFF99CCFF[LM ZDebug]|r Zone='%s' | Sub='%s' | Pending=%s | Likes=%s | Hates=%s",
             realZone or "", subZone or "",
-            Loudmouth.PendingZoneComment and "YES (100%)" or "NO"
+            pendingKind, table.concat(likes, ","), table.concat(hates, ",")
         ))
     end
 
     -- ========================================================================
-    -- Pending Zone Comment — resolve on first macro call after ZONE_CHANGED_NEW_AREA
-    -- When PendingZoneComment is true we IGNORE the action weight and force a
-    -- 100% zone comment.
+    -- Pending Zone Comment -- resolve on the first macro call after a location
+    -- event. Explicit zone comments and preference metadata are both eligible.
     -- ========================================================================
-    if Loudmouth.PendingZoneComment then
+    local pendingKind = Loudmouth.PendingZoneComment and "zone"
+        or (Loudmouth.PendingSubzoneComment and "subzone" or nil)
+    if pendingKind then
         local realZone = GetRealZoneText()
         local subZone = GetSubZoneText() or ""
 
-        local matchedEntry = nil
-
-        -- 1. Try exact match against realZone
-        if personality.zones and personality.zones[realZone] then
-            matchedEntry = personality.zones[realZone]
-        elseif personality.zones then
-            -- 2. Alias check: does realZone match any known alias for a zone key?
-            for zoneName, aliases in pairs(Loudmouth.ZoneAliases or {}) do
-                if personality.zones[zoneName] then
-                    for _, alias in ipairs(aliases) do
-                        if string.lower(realZone) == string.lower(alias) then
-                            matchedEntry = personality.zones[zoneName]
-                            break
-                        end
-                    end
-                    if matchedEntry then break end
-                end
-            end
-
-            -- 3. Fallback: sorted substring search (longest keys first to avoid
-            --    short-word false positives like "Camp" matching "Raven Hill Camp")
-            if not matchedEntry then
-                local sortedKeys = {}
-                for zoneName in pairs(personality.zones) do
-                    sortedKeys[#sortedKeys + 1] = zoneName
-                end
-                table.sort(sortedKeys, function(a, b) return #a > #b end)
-
-                for _, zoneName in ipairs(sortedKeys) do
-                    local data = personality.zones[zoneName]
-                    if type(data.lines) == "table" and #data.lines > 0 then
-                        if string.find(string.lower(realZone), string.lower(zoneName), 1, true) or
-                           string.find(string.lower(zoneName), string.lower(realZone), 1, true) then
-                            matchedEntry = data
-                            break
-                        end
-                    end
-                end
-            end
-        end
-
-        -- 4. Subzone keyword matching (Fix 3: use personality.subzones, not personality.zones.subzones)
-        local subMatchEntry = nil
-        if not matchedEntry and subZone ~= "" then
-            local subData = personality.subzones or (personality.zones and personality.zones.subzones)
-            if subData then
-                for keyword, data in pairs(subData) do
-                    if string.find(string.lower(subZone), string.lower(keyword), 1, true) then
-                        subMatchEntry = data
-                        break
-                    end
-                end
-            end
-        end
-
-        local played = false
-        if matchedEntry and matchedEntry.lines and #matchedEntry.lines > 0 then
-            local line = matchedEntry.lines[math.random(#matchedEntry.lines)]
+        local line = Loudmouth.GetZoneBanterFromTexts(personality, realZone, subZone, pendingKind)
+        if line then
             SafeSendChat(line, "SAY")
-            played = true
-        elseif subMatchEntry and subMatchEntry.lines and #subMatchEntry.lines > 0 then
-            local line = subMatchEntry.lines[math.random(#subMatchEntry.lines)]
-            SafeSendChat(line, "SAY")
-            played = true
         end
 
-        if not matchedEntry and not subMatchEntry and Loudmouth.ShowZoneDebug then
+        if not line and Loudmouth.ShowZoneDebug then
             print(string.format(
                 "|cFFFF8800[Dev Alert]|r Missing zone data for '%s' (sub: '%s'). Please add entries!",
-                realZone, subZone
+                realZone or "", subZone
             ))
         end
 
-        if played then
+        if pendingKind == "zone" then
             Loudmouth.PendingZoneComment = false
-            return
+        else
+            Loudmouth.PendingSubzoneComment = false
         end
 
-        -- No comment was found, but we still consumed the pending flag.
-        Loudmouth.PendingZoneComment = false
+        if line then
+            return
+        end
     end
 
-    local actionData = personality.actions[action]
+    local now = GetTime()
+    if Loudmouth.Cooldowns[action] and (now - Loudmouth.Cooldowns[action] < Loudmouth.CooldownTime) then
+        return
+    end
+
+    local actions = type(personality.actions) == "table" and personality.actions or {}
+    local actionData = actions[action]
+    local genericData = actions["Generic"]
     local phrases = actionData and actionData.lines
 
-    if not phrases then
-        local genericData = personality.actions["Generic"]
-        phrases = genericData and genericData.lines
-    end
+    if type(phrases) ~= "table" or #phrases == 0 then phrases = genericData and genericData.lines end
 
-    if phrases and #phrases > 0 then
+    -- Target preferences replace the normal action phrase, but retain the
+    -- action's probability and cooldown so rotational spells do not spam chat.
+    local targetLine, _, _, targetWeight = Loudmouth.GetTargetBanter(personality, targetUnit)
+    if targetLine then phrases = { targetLine } end
+
+    if type(phrases) == "table" and #phrases > 0 then
         -- Probability check
         local chance = 1.0
         if not Loudmouth.DebugMode then
-            local weight = actionData and actionData.weight
-                or (personality.actions["Generic"] and personality.actions["Generic"].weight or 1.0)
-            chance = weight
+            local preferenceWeight = type(targetWeight) == "number" and targetWeight or nil
+            local weight = targetLine and preferenceWeight or (actionData and actionData.weight) or (genericData and genericData.weight)
+            chance = type(weight) == "number" and weight or 1.0
         end
 
         if math.random() <= chance then
@@ -532,9 +806,11 @@ if not Loudmouth.ZoneFrame then
     Loudmouth.ZoneFrame:RegisterEvent("ZONE_CHANGED")
     Loudmouth.ZoneFrame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
     Loudmouth.ZoneFrame:RegisterEvent("ZONE_CHANGED_INDOORS")
-    Loudmouth.ZoneFrame:SetScript("OnEvent", function()
-        -- All three zone-change events should trigger a pending zone comment.
-        -- ZONE_CHANGED covers subzone transitions that the other two miss.
-        Loudmouth.PendingZoneComment = true
+    Loudmouth.ZoneFrame:SetScript("OnEvent", function(_, event)
+        if event == "ZONE_CHANGED_NEW_AREA" then
+            Loudmouth.PendingZoneComment = true
+        else
+            Loudmouth.PendingSubzoneComment = true
+        end
     end)
 end

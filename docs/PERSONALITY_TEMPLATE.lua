@@ -22,6 +22,38 @@ Loudmouth._RawPersonalities = Loudmouth._RawPersonalities or {}
 Loudmouth._RawPersonalities["<Race><Gender><Class><Variant>"] = {
 
     -- ==================================================================
+    -- LIKES / HATES (optional context-aware dialogue)
+    -- ==================================================================
+    -- Zone traits match race/vibe metadata from ClassicMetadata.lua. They do
+    -- not contain dialogue. Use every matching trait when authoring the exact
+    -- zone/subzone lines below; hated traits control the overall tone when a
+    -- location matches both a like and a hate.
+    -- Entity keys match the target's name, race, class, and creature type.
+    -- Matching is case-insensitive; hates win when both polarities match.
+    -- Entity `weight` is its speaking probability; omit it to inherit the
+    -- triggering action's weight.
+    -- ==================================================================
+    likes = {
+        zones = { "graveyard", "cave" },
+        entities = {
+            -- ["gnome"] = {
+            --     weight = 1 / 20,
+            --     lines = { "Oh, you're so cute!" },
+            -- },
+        },
+    },
+
+    hates = {
+        zones = { "dwarf" },
+        entities = {
+            -- ["dwarf"] = {
+            --     weight = 1 / 20,
+            --     lines = { "This one is for every terrible dwarven ale." },
+            -- },
+        },
+    },
+
+    -- ==================================================================
     -- ACTIONS TABLE
     -- ==================================================================
     -- Each key is an action / spell name that can trigger dialogue. Macro
@@ -91,13 +123,21 @@ Loudmouth._RawPersonalities["<Race><Gender><Class><Variant>"] = {
     -- ==================================================================
     -- SUBZONES TABLE (keyword-match subzone dialogue)
     -- ==================================================================
-    -- Keys are substrings.  When GetSubZoneText() contains the key
-    -- (case-insensitive partial match), the engine picks a random line.
+    -- Parent-zone keys may contain exact/substring subzone entries. This is
+    -- preferred for tailored comments and prevents duplicate subzone names
+    -- from crossing zones. Flat keyword entries remain available as neutral
+    -- fallback comments for broad features such as inns.
     --
     -- Subzones are implemented by the core engine. A subzone check happens once
     -- per pending location visit; matched entries pick a random line directly.
     -- ==================================================================
     subzones = {
+        -- ["Dun Morogh"] = {
+        --     ["The Grizzled Den"] = {
+        --         -- Likes caves + hates dwarves: acknowledge both, hate wins.
+        --         lines = { "A fine cave ruined by the smell of wet dwarves." },
+        --     },
+        -- },
         -- Example entries (replace with subzones relevant to your character):
         -- ["Elwynn Forest"] = {
         --     lines = {
@@ -111,32 +151,32 @@ Loudmouth._RawPersonalities["<Race><Gender><Class><Variant>"] = {
 -- TRIGGER() PRIORITY CHAIN (for reference when writing dialogue)
 -- ============================================================================
 --
--- When Trigger(action) is called by a macro button, the engine follows
+-- When Trigger(action, targetUnit) is called by a macro button, the engine follows
 -- this priority order:
 --
---   1. PENDING ZONE COMMENT (100% when queued)
---      If a zone comment is queued (the player just entered a new zone),
---      it is spoken first with 100% probability.
+--   1. PENDING LOCATION COMMENT (100% when queued)
+--      New-zone events select an exact/alias `zones` entry. Subzone events
+--      select a parent-scoped or flat-keyword `subzones` entry. If both are
+--      pending, the zone is spoken first and the subzone remains queued.
 --
-    --   2. EXACT ZONE MATCH / ALIAS MATCH
---      If the current zone (GetRealZoneText()) matches a key in the
---      `zones` table, a random zone line is selected and spoken.
-    --      Pending major-zone lines trigger once at 100% when matched.
+--   2. COOLDOWN CHECK
+--      Each action has its own per-action cooldown (Loudmouth.CooldownTime,
+--      default 5 seconds). Pending location comments are checked before it.
 --
---   3. SUBZONE KEYWORD MATCH
---      If GetSubZoneText() contains a key from `subzones`, a random subzone
---      line is selected and spoken once for that location visit.
+--   3. TARGET ENTITY MATCH / ACTION ROLL
+--      Target name, race, class, and creature type are matched against
+--      `hates.entities`, then `likes.entities`. A matching line replaces the
+--      normal action line but uses the same probability and cooldown.
 --
---   4. ACTION ROLL
+--   4. ACTION FALLBACK
 --      The engine looks up the action name in `actions[action]`.
 --      It rolls math.random() against actionData.weight.  If the roll
 --      succeeds, a random line from `lines` is sent to chat.
 --      If the action is not found, it falls back to `actions["Generic"]`.
 --
-    --   5. COOLDOWN CHECK
---      Each action has its own per-action cooldown (Loudmouth.CooldownTime,
---      default 5 seconds).  If the action was triggered recently, the
---      entire chain is skipped for that action.
+-- AUTHORING NOTE:
+--   `likes.zones` and `hates.zones` guide each exact location's authored
+--   lines; they are not separate runtime dialogue pools.
 --
 -- DESIGN NOTE:
 --   Keep action weights low (e.g. 1/100 to 1/500) for combat spells so

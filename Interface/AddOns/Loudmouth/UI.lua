@@ -5,6 +5,40 @@
 -- Uses canonical action order from Loudmouth.ActionOrderByClass
 -- ============================================================================
 
+function Loudmouth.BuildMacroBody(actionKey, spellName)
+    if actionKey == "Healing Items" then
+        local healBody =
+            "#showtooltip\n"
+            .. "/run Loudmouth.Trigger(\"%s\")\n"
+            .. "/use Major Healthstone\n"
+            .. "/use Greater Healthstone\n"
+            .. "/use Healthstone\n"
+            .. "/use Lesser Healthstone\n"
+            .. "/use Minor Healthstone"
+        return string.format(healBody, actionKey)
+    end
+
+    if actionKey == "Soulstone" and spellName then
+        local soulstoneBody =
+            "#showtooltip\n"
+            .. "/run Loudmouth.Trigger(\"Soulstone\",\"target\")\n"
+            .. "/use Major Soulstone\n"
+            .. "/use Greater Soulstone\n"
+            .. "/use Soulstone\n"
+            .. "/use Lesser Soulstone\n"
+            .. "/use Minor Soulstone\n"
+            .. "/cast %s"
+        return string.format(soulstoneBody, spellName)
+    end
+
+    if spellName then
+        local targetUnit = Loudmouth.TargetedActions[actionKey] and ",\"target\"" or ""
+        return string.format(
+            "/run Loudmouth.Trigger(\"%s\"%s)\n/cast %s",
+            actionKey, targetUnit, spellName)
+    end
+end
+
 function Loudmouth.GenerateMacros()
     -- Resolve player class to canonical action order
     local _, classFile = UnitClass("player")
@@ -23,6 +57,20 @@ function Loudmouth.GenerateMacros()
     end
 
     local N = #actionOrder
+    local resolvedSpells = {}
+    local resolvableCount = 0
+    for i = 1, N do
+        local actionKey = actionOrder[i]
+        if actionKey == "Healing Items" then
+            resolvableCount = resolvableCount + 1
+        else
+            local spellName = Loudmouth._ResolveSpellName(actionKey)
+            if spellName then
+                resolvedSpells[actionKey] = spellName
+                resolvableCount = resolvableCount + 1
+            end
+        end
+    end
 
     -- ========================================================================
     -- B. Cleanup Phase (Deletes Stale Macros — BEFORE capacity check)
@@ -34,22 +82,17 @@ function Loudmouth.GenerateMacros()
         desiredNames[Loudmouth.MakeMacroName(i)] = true
     end
 
-    -- Collect stale macro names:
-    --   1. Positional macros with index > N (e.g., LM_08 when N=5)
-    --   2. Legacy abbrev macros (LM_ABCD pattern — no longer valid)
-    -- Only delete macros that are NOT in the desired set.
+    -- Collect only positional Loudmouth macros outside the current order.
+    -- Unknown LM_* names may be user-authored and are left untouched.
     local stale = {}
     local preCleanupCount = select(1, GetNumMacros())
     for i = 1, preCleanupCount do
         local n = GetMacroInfo(i)
         if n and not desiredNames[n] then
-            -- Check for stale positional macro (index > N)
             local slotNum = n:match("^LM_(%d+)$")
-            if slotNum then
-                local num = tonumber(slotNum)
-                if num and num > N then
-                    stale[n] = true
-                end
+            local num = slotNum and tonumber(slotNum)
+            if num and (num < 1 or num > N) then
+                stale[n] = true
             end
         end
     end
@@ -70,7 +113,7 @@ function Loudmouth.GenerateMacros()
     -- Refresh macro count after deletions so freed slots are reflected.
     local gCount = select(1, GetNumMacros())
 
-    local neededSlots = #actionOrder
+    local neededSlots = resolvableCount
 
     -- Count LM_XX macros that currently exist (managed by Loudmouth)
     local currentManaged = 0
@@ -109,20 +152,14 @@ function Loudmouth.GenerateMacros()
 
         -- Handle "Healing Items" specially: not a real spell, use pre-built body
         if actionKey == "Healing Items" then
-            local healSeq =
-                "#showtooltip\n"
-                .. "/castsequence reset=combat item:5512,item:5511,item:5509,item:5510,item:9421\n"
-                .. "/run Loudmouth.Trigger(\"%s\")"
-            body = string.format(healSeq, actionKey)
+            body = Loudmouth.BuildMacroBody(actionKey)
         else
             -- Resolve spell info via alias map
-            local spellName = Loudmouth._ResolveSpellName(actionKey)
+            local spellName = resolvedSpells[actionKey]
             if spellName then
                 local _, _, spellIcon = GetSpellInfo(spellName)
                 icon = spellIcon or 134400
-                body = string.format(
-                    "/run Loudmouth.Trigger(\"%s\")\n/cast %s",
-                    actionKey, spellName)
+                body = Loudmouth.BuildMacroBody(actionKey, spellName)
             else
                 -- Spell not found — mark for deletion (old macro may contain
                 -- a different class's spell) and skip creation.
