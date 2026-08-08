@@ -102,7 +102,7 @@ echo ""
 echo "[3/4] Rendering screenshot..."
 "$WSIM" screenshot \
   -o "$RESULTS/loudmouth-panel.webp" \
-  --filter "$FRAME" --width 400 --height 450 2>&1 \
+  --filter "$FRAME" --width 760 --height 580 2>&1 \
   | grep -iE "QuadBatch|Saved" | sed 's/^/      /'
 if [ -f "$RESULTS/loudmouth-panel.webp" ]; then
     # Best-effort PNG conversion for easy viewing

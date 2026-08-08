@@ -65,8 +65,8 @@ Loudmouth._RawPersonalities["<Race><Gender><Class><Variant>"] = {
     --   lines   — array of dialogue strings.  One is chosen at random.
     --
     -- REQUIRED: Include a "Generic" action (weight = 1) as a fallback.
-    -- NOTE: Zone/subzone entries do NOT have weights — the engine selects
-    --       a random line directly when a zone match fires.
+    -- NOTE: Spell, zone, subzone, and target weights are defaults. Players can
+    --       override each percentage from the configuration window.
     -- ==================================================================
     actions = {
         -- Example: a spell action
@@ -98,6 +98,18 @@ Loudmouth._RawPersonalities["<Race><Gender><Class><Variant>"] = {
                 "Nothing wrong with a careful look around.",
             },
         },
+    },
+
+    -- Optional quick-response macros. Each mode requires exactly 8 lines.
+    -- Supported tokens: <target name>, <target class>, and <target race>.
+    responses = {
+        -- ["Yes"] = {
+        --     target = { "Certainly, <target name>!", -- plus 7 more lines
+        --     },
+        --     noTarget = { "Certainly!", -- plus 7 more lines
+        --     },
+        -- },
+        -- Add matching No, Thank, RUN, and Rude entries.
     },
 
     -- ==================================================================
@@ -154,7 +166,7 @@ Loudmouth._RawPersonalities["<Race><Gender><Class><Variant>"] = {
 -- When Trigger(action, targetUnit) is called by a macro button, the engine follows
 -- this priority order:
 --
---   1. PENDING LOCATION COMMENT (100% when queued)
+--   1. PENDING LOCATION COMMENT (authored/configured probability)
 --      New-zone events select an exact/alias `zones` entry. Subzone events
 --      select a parent-scoped or flat-keyword `subzones` entry. If both are
 --      pending, the zone is spoken first and the subzone remains queued.
@@ -166,7 +178,7 @@ Loudmouth._RawPersonalities["<Race><Gender><Class><Variant>"] = {
 --   3. TARGET ENTITY MATCH / ACTION ROLL
 --      Target name, race, class, and creature type are matched against
 --      `hates.entities`, then `likes.entities`. A matching line replaces the
---      normal action line but uses the same probability and cooldown.
+--      normal action line and uses its target-specific configured probability.
 --
 --   4. ACTION FALLBACK
 --      The engine looks up the action name in `actions[action]`.

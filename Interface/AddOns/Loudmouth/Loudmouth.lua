@@ -5,6 +5,56 @@ Loudmouth.Cooldowns = Loudmouth.Cooldowns or {}
 Loudmouth.CooldownTime = Loudmouth.CooldownTime or 5 -- seconds between messages
 Loudmouth.DebugMode = Loudmouth.DebugMode or false
 Loudmouth.ShowZoneDebug = Loudmouth.ShowZoneDebug or false
+Loudmouth.DefaultZoneChance = Loudmouth.DefaultZoneChance or 0.15
+Loudmouth.DefaultTargetChance = Loudmouth.DefaultTargetChance or 0.15
+Loudmouth.ResponseSequence = Loudmouth.ResponseSequence or {}
+
+local function ClampChance(value)
+    value = tonumber(value) or 0
+    return math.min(math.max(value, 0), 1)
+end
+
+local function RollChance(chance)
+    chance = ClampChance(chance)
+    return chance >= 1 or (chance > 0 and math.random() < chance)
+end
+
+function Loudmouth.GetProfileSettings(personalityName)
+    LoudmouthDB = LoudmouthDB or {}
+    LoudmouthDB.profiles = LoudmouthDB.profiles or {}
+
+    local profileName = personalityName or Loudmouth.CurrentPersonality or "Default"
+    local profile = LoudmouthDB.profiles[profileName]
+    if type(profile) ~= "table" then
+        profile = {}
+        LoudmouthDB.profiles[profileName] = profile
+    end
+
+    profile.spell = type(profile.spell) == "table" and profile.spell or {}
+    profile.zone = type(profile.zone) == "table" and profile.zone or {}
+    profile.target = type(profile.target) == "table" and profile.target or {}
+    return profile
+end
+
+function Loudmouth.GetConfiguredChance(kind, key, defaultChance)
+    if Loudmouth.DebugMode then return 1 end
+    local profile = Loudmouth.GetProfileSettings()
+    local bucket = profile[kind]
+    local override = type(bucket) == "table" and bucket[key]
+    if type(override) == "number" then return ClampChance(override) end
+    return ClampChance(defaultChance == nil and 1 or defaultChance)
+end
+
+function Loudmouth.SetConfiguredChance(kind, key, chance)
+    local profile = Loudmouth.GetProfileSettings()
+    if type(profile[kind]) ~= "table" or type(key) ~= "string" then return end
+    profile[kind][key] = ClampChance(chance)
+end
+
+function Loudmouth.ClearConfiguredChance(kind, key)
+    local profile = Loudmouth.GetProfileSettings()
+    if type(profile[kind]) == "table" then profile[kind][key] = nil end
+end
 
 -- Macro generation state
 Loudmouth.pendingMacroUpdate = false   -- set true when macros are requested in combat
@@ -262,19 +312,21 @@ local function FindAuthoredZoneLine(personality, realZone)
     local realCanonical = Loudmouth.GetCanonicalZoneName(realZone)
     local exactEntry = personality.zones[realZone]
     if HasEntryLines(exactEntry) then
-        return PickEntryLine(exactEntry), "zone", realZone
+        return PickEntryLine(exactEntry), "zone", realZone, exactEntry.weight
     end
 
     for _, zoneName in ipairs(CollectSortedKeys(personality.zones)) do
         if NormalizeContextText(zoneName) == NormalizeContextText(realZone) then
-            return PickEntryLine(personality.zones[zoneName]), "zone", zoneName
+            local entry = personality.zones[zoneName]
+            return PickEntryLine(entry), "zone", zoneName, entry.weight
         end
     end
 
     for _, zoneName in ipairs(CollectSortedKeys(personality.zones)) do
         local zoneCanonical = Loudmouth.GetCanonicalZoneName(zoneName)
         if realCanonical and zoneCanonical == realCanonical then
-            return PickEntryLine(personality.zones[zoneName]), "zone", zoneName
+            local entry = personality.zones[zoneName]
+            return PickEntryLine(entry), "zone", zoneName, entry.weight
         end
     end
 
@@ -283,7 +335,8 @@ local function FindAuthoredZoneLine(personality, realZone)
             local zoneNeedle = NormalizeContextText(zoneName)
             local haystack = NormalizeContextText(realZone)
             if string.find(haystack, zoneNeedle, 1, true) or string.find(zoneNeedle, haystack, 1, true) then
-                return PickEntryLine(personality.zones[zoneName]), "zone", zoneName
+                local entry = personality.zones[zoneName]
+                return PickEntryLine(entry), "zone", zoneName, entry.weight
             end
         end
     end
@@ -294,12 +347,12 @@ local function FindAuthoredSubzoneLine(personality, realZone, subZone)
 
     local canonicalZone = Loudmouth.GetCanonicalZoneName(realZone) or realZone
     local scoped = personality.subzones[canonicalZone]
-    local line, key = FindKeywordMatch(scoped, { subZone })
-    if line then return line, "subzone", key end
+    local line, key, entry = FindKeywordMatch(scoped, { subZone })
+    if line then return line, "subzone", canonicalZone .. " / " .. key, entry.weight end
 
     -- Flat keys remain available for broad features such as inns.
-    line, key = FindKeywordMatch(personality.subzones, { subZone })
-    if line then return line, "subzone", key end
+    line, key, entry = FindKeywordMatch(personality.subzones, { subZone })
+    if line then return line, "subzone", key, entry.weight end
 end
 
 
@@ -632,6 +685,58 @@ local function SafeSendChat(msg, chatType)
     SendChatMessage(msg, chatType or "SAY")
 end
 
+local function ReplaceResponseTokens(template, context)
+    local values = {
+        ["<target name>"] = context.name or "friend",
+        ["<target class>"] = context.class or context.creatureType or "friend",
+        ["<target race>"] = context.race or "friend",
+    }
+    local result = template
+    for token, value in pairs(values) do
+        result = string.gsub(result, token, function() return value end)
+    end
+    return result
+end
+
+function Loudmouth.GetResponseTargetContext(targetUnit)
+    if type(targetUnit) == "table" then return targetUnit end
+    if type(targetUnit) ~= "string" or targetUnit == "" then return nil end
+    if type(UnitExists) == "function" and not UnitExists(targetUnit) then return nil end
+
+    local context = {}
+    if type(UnitName) == "function" then context.name = UnitName(targetUnit) end
+    if type(UnitClass) == "function" then context.class = UnitClass(targetUnit) end
+    if type(UnitRace) == "function" then context.race = UnitRace(targetUnit) end
+    if type(UnitCreatureType) == "function" then context.creatureType = UnitCreatureType(targetUnit) end
+    if not context.name and not context.class and not context.race and not context.creatureType then return nil end
+    return context
+end
+
+function Loudmouth.GetResponseMessage(personality, responseKind, targetContext, sequenceIndex)
+    local response = type(personality) == "table" and personality.responses and personality.responses[responseKind]
+    if type(response) ~= "table" then return nil end
+
+    local context = Loudmouth.GetResponseTargetContext(targetContext)
+    local pool = context and response.target or response.noTarget
+    if type(pool) ~= "table" or #pool == 0 then return nil end
+
+    local index = ((tonumber(sequenceIndex) or 1) - 1) % #pool + 1
+    return ReplaceResponseTokens(pool[index], context or {}), index, #pool
+end
+
+function Loudmouth.Respond(responseKind)
+    local personality = Loudmouth.Personalities[Loudmouth.CurrentPersonality]
+    if type(personality) ~= "table" then return end
+
+    local nextIndex = Loudmouth.ResponseSequence[responseKind] or 1
+    local context = Loudmouth.GetResponseTargetContext("target")
+    local message, usedIndex, poolSize = Loudmouth.GetResponseMessage(personality, responseKind, context, nextIndex)
+    if not message then return end
+
+    SafeSendChat(message, "SAY")
+    Loudmouth.ResponseSequence[responseKind] = usedIndex % poolSize + 1
+end
+
 function Loudmouth.Trigger(action, targetUnit)
     -- ========================================================================
     -- Localization Strategy (English-first)
@@ -689,8 +794,10 @@ function Loudmouth.Trigger(action, targetUnit)
         local realZone = GetRealZoneText()
         local subZone = GetSubZoneText() or ""
 
-        local line = Loudmouth.GetZoneBanterFromTexts(personality, realZone, subZone, pendingKind)
-        if line then
+        local line, _, zoneKey, zoneWeight = Loudmouth.GetZoneBanterFromTexts(personality, realZone, subZone, pendingKind)
+        local zoneChance = Loudmouth.GetConfiguredChance("zone", zoneKey, zoneWeight or Loudmouth.DefaultZoneChance)
+        local sentZoneLine = line and RollChance(zoneChance)
+        if sentZoneLine then
             SafeSendChat(line, "SAY")
         end
 
@@ -707,7 +814,7 @@ function Loudmouth.Trigger(action, targetUnit)
             Loudmouth.PendingSubzoneComment = false
         end
 
-        if line then
+        if sentZoneLine then
             return
         end
     end
@@ -726,19 +833,22 @@ function Loudmouth.Trigger(action, targetUnit)
 
     -- Target preferences replace the normal action phrase, but retain the
     -- action's probability and cooldown so rotational spells do not spam chat.
-    local targetLine, _, _, targetWeight = Loudmouth.GetTargetBanter(personality, targetUnit)
+    local targetLine, _, targetKey, targetWeight = Loudmouth.GetTargetBanter(personality, targetUnit)
     if targetLine then phrases = { targetLine } end
 
     if type(phrases) == "table" and #phrases > 0 then
         -- Probability check
         local chance = 1.0
         if not Loudmouth.DebugMode then
-            local preferenceWeight = type(targetWeight) == "number" and targetWeight or nil
-            local weight = targetLine and preferenceWeight or (actionData and actionData.weight) or (genericData and genericData.weight)
-            chance = type(weight) == "number" and weight or 1.0
+            local actionWeight = (actionData and actionData.weight) or (genericData and genericData.weight) or 1
+            if targetLine then
+                chance = Loudmouth.GetConfiguredChance("target", targetKey, targetWeight or Loudmouth.DefaultTargetChance)
+            else
+                chance = Loudmouth.GetConfiguredChance("spell", action, actionWeight)
+            end
         end
 
-        if math.random() <= chance then
+        if RollChance(chance) then
             local phrase = phrases[math.random(#phrases)]
             SafeSendChat(phrase, "SAY")
             Loudmouth.Cooldowns[action] = now

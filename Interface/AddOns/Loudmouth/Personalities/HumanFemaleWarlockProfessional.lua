@@ -381,6 +381,8 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
                 "Show some respect for the void.",
                 "The darker your skin, the harder you fall.",
                 "Armor of shadow, fortitude of hellfire.",
+                "A sensible layer of demonic protection.",
+                "Even novice defenses benefit from infernal craftsmanship.",
             },
         },
         ["Drain Soul"] = {
@@ -390,6 +392,7 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
                 "Siphoning what remains.",
                 "Feel that drain? That's death, slowly.",
                 "Every last drop.",
+                "A soul should never go to waste.",
             },
         },
         ["Create Healthstone"] = {
@@ -398,6 +401,8 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
                 "A little insurance, shaped from a soul.",
                 "Healthstone prepared. Try not to waste it on a paper cut.",
                 "Soul shard in, survival out. Efficient.",
+                "Preparedness is the difference between a warlock and a corpse.",
+                "One stone, carefully made, for the next emergency.",
             },
         },
         ["Health Funnel"] = {
@@ -406,6 +411,8 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
                 "My life for yours, demon. Do make it worthwhile.",
                 "Hold still. This is maintenance, not affection.",
                 "A measured transfer of vitality. Nothing sentimental.",
+                "You are more valuable alive, so take what you need.",
+                "This vitality is on loan. Spend it well.",
             },
         },
         ["Ritual of Summoning"] = {
@@ -414,6 +421,8 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
                 "The portal is ready. Two assistants, if you please.",
                 "Stand at the circle and try not to interrupt the ritual.",
                 "We will bring them here. Distance is merely an inconvenience.",
+                "The circle is complete. Our absent colleague will be absent no longer.",
+                "A precise ritual makes miles irrelevant.",
             },
         },
         ["Shadow Ward"] = {
@@ -422,6 +431,8 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
                 "Shadow answers to me, not them.",
                 "A ward against the void. Professional caution.",
                 "Darkness is less threatening when properly contained.",
+                "Their shadow magic will find me properly prepared.",
+                "A disciplined warlock always wards against her own specialty.",
             },
         },
         ["Create Firestone"] = {
@@ -430,6 +441,8 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
                 "Fire, compressed into something useful.",
                 "A firestone for when ordinary flames lack discipline.",
                 "Shard, flame, focus. The formula remains elegant.",
+                "A disciplined flame belongs in the palm, not on the drapes.",
+                "The firestone is ready to make every strike more persuasive.",
             },
         },
         ["Create Spellstone"] = {
@@ -438,6 +451,8 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
                 "A spellstone turns hostile magic into a temporary inconvenience.",
                 "Arcane protection, produced by superior methods.",
                 "Let their magic break against this stone.",
+                "Hostile sorcery has met its contractual limit.",
+                "This stone will absorb their cleverest mistake.",
             },
         },
         ["Sense Demons"] = {
@@ -446,6 +461,8 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
                 "Demons leave a distinctive stain on the world.",
                 "Something infernal is nearby. I can feel it.",
                 "No demon escapes a trained eye for long.",
+                "Infernal signatures are impossible to hide from me.",
+                "The hunt is easier once every demon leaves a trail.",
             },
         },
         ["Detect Invisibility"] = {
@@ -454,6 +471,8 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
                 "Hidden does not mean safe.",
                 "Let us see what prefers not to be seen.",
                 "Invisibility is merely a problem of perception.",
+                "Subtle wards reveal even careful intruders.",
+                "Now let us see who mistook concealment for safety.",
             },
         },
         ["Summon Incubus"] = {
@@ -462,6 +481,8 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
                 "Incubus, compose yourself. We have work to do.",
                 "Charm is useful. Discipline is essential.",
                 "Come forth, incubus, and keep the theatrics brief.",
+                "Your talents are required, incubus. Use them professionally.",
+                "The contract calls for charm. Do try to remain focused.",
             },
         },
         ["Warlock Mount"] = {
@@ -470,6 +491,8 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
                 "A proper steed should arrive in flame.",
                 "No reins, no stable fees, only a binding contract.",
                 "The road is long. Fortunately, the nether provides transportation.",
+                "Flaming hooves make a suitably punctual entrance.",
+                "A bound steed is far more reliable than a rented one.",
             },
         },
         ["Amplify Curse"] = {
@@ -478,6 +501,8 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
                 "A small adjustment should make this considerably worse.",
                 "Why settle for a curse when one can refine it?",
                 "The affliction is sound. Let us increase the dosage.",
+                "Precision is admirable; excessive precision is devastating.",
+                "One careful amplification, and discomfort becomes catastrophe.",
             },
         },
         ["Curse of Exhaustion"] = {
@@ -486,6 +511,8 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
                 "Every step will feel like the last.",
                 "Run if you like. Fatigue will catch you first.",
                 "Let exhaustion drag at your bones.",
+                "Your escape has been reduced to a slow administrative process.",
+                "Every path feels longer when I write the terms.",
             },
         },
         ["Siphon Life"] = {
@@ -494,6 +521,8 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
                 "Your life is being reassigned to a better owner.",
                 "A steady flow of vitality. Much appreciated.",
                 "Waste not. Even your life has some value.",
+                "Your strength will sustain someone more qualified.",
+                "Consider this a compulsory donation of vitality.",
             },
         },
         ["Dark Pact"] = {
@@ -502,6 +531,8 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
                 "The contract includes an energy surcharge.",
                 "Lend me your power, demon. That was not a request.",
                 "A familiar is simply a reserve of useful magic.",
+                "Our agreement permits withdrawals. I checked.",
+                "Power moves from servant to master, exactly as intended.",
             },
         },
         ["Fel Domination"] = {
@@ -510,6 +541,8 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
                 "No delays. I require a demon immediately.",
                 "A firm command shortens any summoning ritual.",
                 "The nether will answer now.",
+                "There is no need for ceremony when authority will suffice.",
+                "Stand aside. I have expedited the summoning.",
             },
         },
         ["Demonic Sacrifice"] = {
@@ -518,6 +551,8 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
                 "Your service concludes with one final contribution.",
                 "Nothing personal, demon. Your essence is simply more useful.",
                 "A binding contract always includes a termination clause.",
+                "Your essence remains useful even after your dismissal.",
+                "Service, sacrifice, power. The arrangement is complete.",
             },
         },
         ["Soul Link"] = {
@@ -526,6 +561,8 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
                 "Our souls are linked. Try not to embarrass me.",
                 "Shared pain encourages excellent discipline.",
                 "One bond, two bodies, considerably better odds.",
+                "The demon may share my burden. That is why it is here.",
+                "A linked soul is an efficient form of protection.",
             },
         },
         ["Shadowburn"] = {
@@ -534,6 +571,8 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
                 "A final spark of shadow should suffice.",
                 "Burn quickly. I have other appointments.",
                 "One shard for one abrupt ending.",
+                "A concentrated shadow makes an excellent final argument.",
+                "This conclusion will be brief and exceptionally dark.",
             },
         },
         ["Conflagrate"] = {
@@ -542,23 +581,135 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
                 "The fire was already there. I merely encouraged it.",
                 "Let every lingering ember erupt at once.",
                 "A controlled conflagration, more or less.",
+                "All that careful burning deserves a decisive finish.",
+                "The embers have waited long enough. Let them erupt.",
+            },
+        },
+    },
+
+    responses = {
+        ["Yes"] = {
+            target = {
+                "Of course, my dear <target class>.",
+                "Certainly, <target name>. You may rely on me.",
+                "Yes, <target name>. That arrangement is acceptable.",
+                "Agreed, my dear <target class>. Let us proceed.",
+                "I believe that will do nicely, <target name>.",
+                "You have my assent, <target name>.",
+                "Very well, <target class>. Consider it settled.",
+                "Absolutely, <target name>. I was hoping you would ask.",
+            },
+            noTarget = {
+                "Of course, my dear friend.",
+                "Certainly. You may rely on me.",
+                "Yes, that arrangement is acceptable.",
+                "Agreed. Let us proceed.",
+                "I believe that will do nicely.",
+                "You have my assent.",
+                "Very well. Consider it settled.",
+                "Absolutely. I was hoping you would ask.",
+            },
+        },
+        ["No"] = {
+            target = {
+                "No, <target name>. I must decline.",
+                "Not this time, my dear <target class>.",
+                "I am afraid that will not be possible, <target name>.",
+                "Absolutely not, <target class>. Let us be sensible.",
+                "Your proposal has been considered and rejected, <target name>.",
+                "No, <target name>. My schedule is already infernal.",
+                "I think not, my dear <target class>.",
+                "Regrettably, <target name>, the answer remains no.",
+            },
+            noTarget = {
+                "No, I must decline.",
+                "Not this time, my dear friend.",
+                "I am afraid that will not be possible.",
+                "Absolutely not. Let us be sensible.",
+                "Your proposal has been considered and rejected.",
+                "No. My schedule is already infernal.",
+                "I think not.",
+                "Regrettably, the answer remains no.",
+            },
+        },
+        ["Thank"] = {
+            target = {
+                "Thank you, <target name>. Your assistance is appreciated.",
+                "My gratitude, dear <target class>.",
+                "Nicely done, <target name>. I owe you thanks.",
+                "You have my sincere appreciation, <target name>.",
+                "That was most helpful, my dear <target class>.",
+                "Thank you, <target name>. Professional courtesy is not forgotten.",
+                "I appreciate the gesture, <target class>.",
+                "You have been invaluable, <target name>. Thank you.",
+            },
+            noTarget = {
+                "Thank you. Your assistance is appreciated.",
+                "My gratitude, dear friend.",
+                "Nicely done. I owe you thanks.",
+                "You have my sincere appreciation.",
+                "That was most helpful.",
+                "Thank you. Professional courtesy is not forgotten.",
+                "I appreciate the gesture.",
+                "You have been invaluable. Thank you.",
+            },
+        },
+        ["RUN"] = {
+            target = {
+                "Run, <target name>! Survival takes priority!",
+                "Retreat, my dear <target class>! Immediately!",
+                "Move, <target name>! This position is untenable!",
+                "Fall back, <target class>! We can argue later!",
+                "To safety, <target name>! The odds have become insulting!",
+                "Withdraw, my dear <target class>! That is a professional order!",
+                "Run now, <target name>! Heroics are no longer efficient!",
+                "Disengage, <target class>! I refuse to die here!",
+            },
+            noTarget = {
+                "Run! Survival takes priority!",
+                "Retreat, my dear friends! Immediately!",
+                "Move! This position is untenable!",
+                "Fall back! We can argue later!",
+                "To safety! The odds have become insulting!",
+                "Withdraw! That is a professional order!",
+                "Run now! Heroics are no longer efficient!",
+                "Disengage! I refuse to die here!",
+            },
+        },
+        ["Rude"] = {
+            target = {
+                "Really, <target name>? How disappointingly crude.",
+                "Mind your manners, my dear <target class>.",
+                "That was beneath even your standards, <target name>.",
+                "How tiresome, <target class>. Do compose yourself.",
+                "Your conduct has been noted, <target name>.",
+                "I expected little, <target class>, and you delivered less.",
+                "Charming, <target name>. In the most regrettable sense.",
+                "Do try civility next time, my dear <target class>.",
+            },
+            noTarget = {
+                "Really? How disappointingly crude.",
+                "Mind your manners, my dear friend.",
+                "That was beneath even modest standards.",
+                "How tiresome. Do compose yourself.",
+                "That conduct has been noted.",
+                "I expected little and received less.",
+                "Charming, in the most regrettable sense.",
+                "Do try civility next time.",
             },
         },
     },
 
     zones = {
         -- Starting Zones (Alliance)
-        ["Goldshire"] = {
-            weight = 0.10,
-            lines = {
-                "Just a logging camp. Boring. Though the innkeeper pours a decent draught.",
-            },
-        },
         ["Stormwind City"] = {
             weight = 0.12,
             lines = {
                 "The nobility strut around as if they invented order. Typical human vanity.",
                 "They fear anything they can't tax or decree away.",
+                "Stormwind gleams above while its most interesting practitioners work below.",
+                "The canals are orderly, the guards punctual, and the politics exhausting.",
+                "Human ambition built these walls; human vanity decorated every inch.",
             },
         },
         ["Elwynn Forest"] = {
@@ -566,18 +717,29 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
             lines = {
                 "Trees. Everywhere. Humans prefer their forests sheltered.",
                 "The wild is far more... productive when left to rot.",
+                "Elwynn is manicured so carefully one expects the wolves to file permits.",
+                "Sunlit paths and respectable farms conceal remarkably persistent danger.",
+                "The forest is calm, green, and almost entirely lacking in useful gloom.",
             },
         },
         ["Darnassus"] = {
             weight = 0.10,
             lines = {
                 "Night Elf arrogance in flesh and bark. They hide from history while it catches up to them.",
+                "Darnassus is lovely if one enjoys stairs, leaves, and condescension.",
+                "The night elves built a capital around nature and still made it feel formal.",
+                "Moonlight softens the city, though not its residents' opinions.",
+                "A beautiful refuge suspended above all practical concerns.",
             },
         },
         ["Teldrassil"] = {
             weight = 0.10,
             lines = {
                 "A floating tree. The futility of trying to climb your way to the heavens.",
+                "Teldrassil is an impressive monument to botanical overconfidence.",
+                "Even the shadows here smell of leaves and night elf certainty.",
+                "A whole kingdom balanced on a branch. What could possibly go wrong?",
+                "The tree is vast, luminous, and desperately in need of corruption.",
             },
         },
         -- Mid-Level Hubs & Dark Places
@@ -588,18 +750,7 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
                 "The stonework is impressive, but only if you enjoy looking at something that reeks of sweat and cheap beer.",
                 "Dwarves are the reason the air in Ironforge feels thick and stale.",
                 "I'd rather kiss a ghoul than spend another moment in that smelly hole.",
-            },
-        },
-        ["Iron Forge"] = {
-            weight = 0.15,
-            lines = {
-                "The Great Forge never sleeps, so the soot, noise, and dwarven stench never stop either.",
-            },
-        },
-        ["Dwarven Halls"] = {
-            weight = 0.15,
-            lines = {
-                "Endless stone corridors amplifying every dwarven belch. These halls are intolerable.",
+                "Ironforge proves ventilation should be considered before carving a city into stone.",
             },
         },
         ["Dun Morogh"] = {
@@ -609,6 +760,7 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
                 "Snow, rock, and dwarves in every direction. What a miserable little kingdom.",
                 "Dun Morogh might look pristine if the snow were not packed down by filthy dwarf boots.",
                 "A frozen landscape full of wet beards and stale ale. Revolting.",
+                "Dun Morogh's cold is bracing; its dwarves are merely abrasive.",
             },
         },
         ["Loch Modan"] = {
@@ -618,12 +770,17 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
                 "Loch Modan... a lovely lake ruined by the smell of wet dwarves. Ick.",
                 "The lake is beautiful from a distance. Unfortunately, the dwarves are visible from here too.",
                 "Even the mountain air cannot overpower the stench drifting out of Thelsamar.",
+                "The loch reflects the mountains beautifully and the dwarves unfortunately.",
             },
         },
         ["Westfall"] = {
             weight = 0.10,
             lines = {
                 "Furlbrow's farm is a tragic reminder of what happens when you underestimate the void.",
+                "Westfall is a lesson in how quickly neglect turns farmland into a battlefield.",
+                "Dust, broken harvests, and masked criminals: the kingdom's pantry is thriving.",
+                "The wind carries equal measures of chaff and desperation.",
+                "These empty fields have more menace than Stormwind would care to admit.",
             },
         },
         ["Duskwood"] = {
@@ -633,18 +790,27 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
                 "The air is thick with decay — absolutely intoxicating.",
                 "The trees are twisted, the shadows suffocating, and the screams endless... what a symphony.",
                 "Everything here is cursed, haunted, or dying... I feel right at home.",
+                "Duskwood understands that every forest benefits from ghosts and permanent twilight.",
             },
         },
         ["Swamp of Sorrows"] = {
             weight = 0.12,
             lines = {
                 "Stonard is mud, filth, and despair. It is beautiful.",
+                "The swamp air clings like a curse, which improves it considerably.",
+                "Every pool conceals teeth, poison, or both. Admirably efficient.",
+                "The Swamp of Sorrows has abandoned cheerfulness in favor of honesty.",
+                "Mist and misery suit this place better than sunlight ever could.",
             },
         },
         ["Badlands"] = {
             weight = 0.12,
             lines = {
                 "Dust, heat, and endless rock. The Badlands certainly earned the name.",
+                "The Badlands offer no comfort, shade, or false advertising.",
+                "Even the dust here seems hostile and professionally committed.",
+                "Ancient secrets lie under every barren ridge, usually beneath several angry creatures.",
+                "A severe landscape, stripped of every unnecessary kindness.",
             },
         },
         ["Searing Gorge"] = {
@@ -654,12 +820,17 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
                 "Searing Gorge: ash in my lungs and Dark Iron dwarves under every rock. Ghastly.",
                 "The landscape is already burning. Surely it can manage to dispose of the dwarves too.",
                 "Thorium Point proves dwarves can make even a volcanic wasteland less pleasant.",
+                "The gorge burns beautifully whenever the dwarves are out of view.",
             },
         },
         ["Blasted Lands"] = {
             weight = 0.15,
             lines = {
                 "A barren red wasteland scarred by old magic. At least the view is honest.",
+                "The Blasted Lands still bear the sort of magical damage others prefer to forget.",
+                "Nothing grows here without malice, stubbornness, or demonic assistance.",
+                "The red earth remembers every catastrophe that shaped it.",
+                "A ruined frontier beside the Dark Portal is excellent professional territory.",
             },
         },
         -- Late Game / Hardcore Endgame Zones
@@ -668,36 +839,59 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
             lines = {
                 "Fire everywhere. It is comforting, in a way.",
                 "Molten Core is right around the bend; the fel energy radiating from the mountain would make even a lesser mage weep.",
+                "The Steppes have reduced scenery to ash, flame, and excellent dramatic lighting.",
+                "Blackrock Mountain dominates the horizon like a threat with impeccable posture.",
+                "Only the hardiest creatures remain here, and most are already on fire.",
             },
         },
         ["Western Plaguelands"] = {
             weight = 0.15,
             lines = {
                 "Chillwind Camp is freezing. But Scholomance... ah, that ancient mausoleum. An entire dungeon of corpses waiting for a fresh soul to bind them.",
+                "The plague has made the western fields far more academically interesting.",
+                "Ruined farms and restless dead stretch from one horizon to the next.",
+                "Every road leads past a grave, a ghoul, or a cautionary tale.",
+                "The living maintain a few camps here, mostly to emphasize the surrounding death.",
             },
         },
         ["Eastern Plaguelands"] = {
             weight = 0.15,
             lines = {
                 "Light's Hope Chapel stands as a monument to human stubbornness, but Stratholme remains the true prize. An entire city preserved in undeath.",
+                "The Eastern Plaguelands are a comprehensive study in undeath.",
+                "Even the air feels diseased, ambitious, and unwilling to rest.",
+                "Scourge architecture lacks warmth but demonstrates impressive consistency.",
+                "Every ruined tower here points toward another useful horror.",
             },
         },
         ["Blackrock Mountain"] = {
             weight = 0.18,
             lines = {
                 "A cathedral of ash and magma. The upper reaches house our greatest trials—Lower, Upper, and the Deep.",
+                "Blackrock Mountain contains enough fire, shadow, and hostility for a lifetime of study.",
+                "Entire armies have nested inside this mountain and somehow still dispute the lease.",
+                "The stone trembles with industry, dragons, and very poor decisions.",
+                "One mountain, several fortresses, and no shortage of infernal opportunity.",
             },
         },
         ["Deadwind Pass"] = {
             weight = 0.15,
             lines = {
                 "Karazhan looms ahead, defying gravity and reason alike. A chaotic masterpiece perfectly suited for my craft.",
+                "Deadwind Pass is appropriately named and delightfully unwelcoming.",
+                "The silence here feels deliberate, as though the land is listening.",
+                "Even the wind approaches Karazhan cautiously.",
+                "A haunted road to a cursed tower is exactly my sort of itinerary.",
             },
         },
         ["Tanaris"] = {
             weight = 0.12,
             lines = {
                 "Gadgetzan is neutral ground. Useful, but dusty. However, Zul'Farrak offers plenty of ancient curses to study.",
+                "Tanaris buries old magic beneath enough sand to discourage amateurs.",
+                "Gadgetzan sells everything except shade at a reasonable price.",
+                "The desert preserves ruins, bones, and grudges exceptionally well.",
+                "Endless dunes make every distant curse look like a promising destination.",
             },
         },
         ["Tirisfal Glades"] = {
@@ -705,6 +899,9 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
             lines = {
                 "The dead have inherited these gloomy woods. They have improved the neighborhood considerably.",
                 "Tirisfal is steeped in undeath, decay, and dreadful history. I approve.",
+                "The glades wear perpetual gloom with admirable confidence.",
+                "Ruined Lordaeron has exchanged royal ceremony for practical necromancy.",
+                "Every misty path seems to lead toward a crypt. Excellent planning.",
             },
         },
         ["Silverpine Forest"] = {
@@ -712,6 +909,9 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
             lines = {
                 "A shadowed forest thick with undead influence. Silverpine has excellent atmosphere.",
                 "The living cling nervously to these woods while the dead thrive. Sensible priorities.",
+                "Silverpine's fog conceals ruins, beasts, and countless worthwhile mistakes.",
+                "The forest has a quiet menace that louder places never achieve.",
+                "Moonlight, grave soil, and distant howls make a refined combination.",
             },
         },
         ["Felwood"] = {
@@ -719,6 +919,9 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
             lines = {
                 "Fel energy has soaked into the forest itself. What magnificent corruption.",
                 "Demons and fel magic have transformed Felwood into something truly interesting.",
+                "Felwood demonstrates how dramatically corruption can improve a color palette.",
+                "Every poisoned stream carries evidence of magnificent magical excess.",
+                "The forest resists its corruption just enough to keep the process entertaining.",
             },
         },
         ["Undercity"] = {
@@ -726,6 +929,9 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
             lines = {
                 "An entire capital beneath the earth, run by the undead. Inspired.",
                 "Undercity smells of plague and alchemy, but the residents have impeccable taste in decor.",
+                "The old capital's sewers now host laboratories of remarkable ambition.",
+                "Undercity replaces sunlight with green fire and calls it progress. I agree.",
+                "The elevators are hazardous, but the apothecaries make the trip worthwhile.",
             },
         },
         ["Ragefire Chasm"] = {
@@ -733,6 +939,9 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
             lines = {
                 "A volcanic cave with demonic company. Ragefire Chasm has everything I require.",
                 "Hot stone, deep shadows, and demonic whispers... delightful working conditions.",
+                "Ragefire's cultists have chosen an excellent cavern and a terrible management structure.",
+                "The chasm glows with the warm promise of avoidable disaster.",
+                "Beneath Orgrimmar lies a far more interesting city of flame and secrets.",
             },
         },
         ["Wailing Caverns"] = {
@@ -740,6 +949,9 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
             lines = {
                 "A vast cave that actually wails. Finally, architecture with personality.",
                 "The twisting tunnels of Wailing Caverns feel wonderfully removed from the sun.",
+                "These caverns dream so loudly that even the reptiles seem unsettled.",
+                "Verdant growth and nightmare magic compete for every tunnel.",
+                "The maze is damp, alive, and thoroughly unwilling to explain itself.",
             },
         },
         ["The Deadmines"] = {
@@ -747,6 +959,9 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
             lines = {
                 "Miles of dark mine tunnels beneath Westfall. Much better than the farmland above.",
                 "The Deadmines are damp, secretive, and full of useful echoes. Charming.",
+                "Westfall hid an industrial rebellion underground with predictable results.",
+                "The machinery is loud, but the conspiracy has admirable scale.",
+                "Every tunnel leads deeper into someone else's elaborate grievance.",
             },
         },
         ["Blackfathom Deeps"] = {
@@ -754,6 +969,9 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
             lines = {
                 "A drowned cavern of ancient shadows. Blackfathom Deeps is exquisite.",
                 "Ruined halls beneath the earth and sea... exactly where forbidden things belong.",
+                "Blackfathom's drowned stones remember powers older than the current occupants.",
+                "The sea presses overhead while darker things gather below.",
+                "Ancient worship and flooded caverns make excellent companions.",
             },
         },
         ["Razorfen Kraul"] = {
@@ -761,6 +979,9 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
             lines = {
                 "A thorn-choked cavern hidden from daylight. Surprisingly tasteful.",
                 "Razorfen Kraul is cramped, dark, and dangerous. I feel quite comfortable.",
+                "The thorns form walls more effective than many human fortifications.",
+                "Every bend offers another ambush and another reason to burn the undergrowth.",
+                "The Kraul has turned hostile vegetation into respectable architecture.",
             },
         },
         ["Razorfen Downs"] = {
@@ -769,6 +990,8 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
                 "A cavern, a graveyard, and an undead infestation together at last. Perfect.",
                 "Razorfen Downs combines deep shadows with restless dead. An inspired arrangement.",
                 "Bones below ground and spirits that refuse to leave... I adore this place.",
+                "The Downs treat death less as an ending and more as local government.",
+                "Thorns above, graves below, and necromancy throughout. Efficient.",
             },
         },
         ["Uldaman"] = {
@@ -778,6 +1001,7 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
                 "A buried titan vault spoiled by dwarf boots, dwarf picks, and dwarf opinions. Disgusting.",
                 "I love the darkness of Uldaman. I hate the wet-dwarf smell trapped inside it.",
                 "Wonderful caves, priceless secrets, and far too many dwarves. What a waste.",
+                "Titan machinery deserves scholars, not bearded trespassers with mining picks.",
             },
         },
         ["Maraudon"] = {
@@ -785,6 +1009,9 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
             lines = {
                 "Maraudon's vast corrupted caverns are almost soothing.",
                 "A subterranean maze where nature has gone terribly wrong. Beautiful.",
+                "Maraudon turns corruption into an ecosystem of impressive scale.",
+                "Every chamber is lush, dangerous, and entirely too pleased with itself.",
+                "Stone, poison, and ancient power wind together beneath Desolace.",
             },
         },
         ["Blackrock Depths"] = {
@@ -794,6 +1021,7 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
                 "Blackrock Depths has impressive scale and absolutely appalling residents.",
                 "Lava, iron, and the smell of scorched beard. This place is intolerable.",
                 "The Dark Irons buried themselves deep underground. If only they had stayed buried.",
+                "The Depths would be a masterpiece if its dwarven population reached zero.",
             },
         },
         ["Shadowfang Keep"] = {
@@ -801,6 +1029,9 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
             lines = {
                 "A haunted keep crowded with undead and curses. Shadowfang understands hospitality.",
                 "Every corridor groans with restless spirits. I could happily move in.",
+                "Shadowfang's towers collect curses as efficiently as they collect dust.",
+                "The keep offers ghosts, worgen, and excellent views of a doomed village.",
+                "Its stones have absorbed enough misery to qualify as enchanted.",
             },
         },
         ["Scholomance"] = {
@@ -808,6 +1039,9 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
             lines = {
                 "A haunted school of necromancy filled with undead scholars. Finally, serious academics.",
                 "Scholomance turns death into a curriculum. I admire its standards.",
+                "The faculty may be deceased, but their research remains vigorous.",
+                "Every classroom offers a practical lesson in consequences.",
+                "A school beneath a crypt eliminates the commute between study and burial.",
             },
         },
         ["Stratholme"] = {
@@ -815,6 +1049,9 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
             lines = {
                 "An entire city preserved in undeath. Stratholme is a masterpiece.",
                 "The dead own every street now, and the city has never felt more alive.",
+                "Stratholme preserves catastrophe with museum-quality thoroughness.",
+                "Every avenue burns, festers, or leads toward something memorable.",
+                "The city's bells should ring for the dead; they have certainly earned it.",
             },
         },
         ["Molten Core"] = {
@@ -822,6 +1059,9 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
             lines = {
                 "A cavern large enough to contain a sea of fire. Magnificent.",
                 "Molten Core proves that caves need not be cold to be inviting.",
+                "The Core is less a cavern than a formal audience with fire.",
+                "Lava illuminates every threat with refreshing honesty.",
+                "Ragnaros keeps a magnificent court, though his hospitality is uneven.",
             },
         },
         ["Onyxia's Lair"] = {
@@ -829,6 +1069,9 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
             lines = {
                 "A dragon's cavern should always feel this grand and threatening.",
                 "Onyxia chose a dark volcanic lair. The dragon has taste.",
+                "Every scorched chamber announces that subtlety was never the objective.",
+                "The lair balances brood, treasure, and mortal peril beautifully.",
+                "A dragon's secrets are best studied after addressing the dragon.",
             },
         },
         ["Blackwing Lair"] = {
@@ -836,6 +1079,9 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
             lines = {
                 "Deep mountain halls full of fire and dragons. Splendid.",
                 "Blackwing Lair is dark, volcanic, and magnificently hostile.",
+                "Nefarian has furnished these halls with experiments and arrogance in equal measure.",
+                "The mountain's upper chambers trade dwarves for dragons. A vast improvement.",
+                "Every laboratory here violates several sensible magical principles.",
             },
         },
         ["Naxxramas"] = {
@@ -843,17 +1089,53 @@ Loudmouth._RawPersonalities["HumanFemaleWarlockProfessional"] = {
             lines = {
                 "A fortress ruled by necromancers and packed with undead. Breathtaking.",
                 "Naxxramas elevates undeath from a practice to an art form.",
+                "Every wing presents a different discipline of exquisite mortality.",
+                "The necropolis floats because ordinary intimidation was apparently insufficient.",
+                "Kel'Thuzad has curated a formidable collection of horrors.",
             },
         },
         ["Un'Goro Crater"] = {
             weight = 0.15,
             lines = {
                 "Prehistoric monsters and toxic mud. My absolute favorite hunting ground.",
+                "Un'Goro compresses several lost ages into one humid death trap.",
+                "The crater's creatures approach every meal with prehistoric enthusiasm.",
+                "Crystal pylons and enormous reptiles suggest a fascinating lack of supervision.",
+                "Even the plants here have evolved professional hostility.",
             },
         },
     },
 
     subzones = {
+        ["Elwynn Forest"] = {
+            ["Goldshire"] = {
+                weight = 0.10,
+                lines = {
+                    "Just a logging camp. Boring. Though the innkeeper pours a decent draught.",
+                    "Goldshire is pleasant in the aggressively ordinary human fashion.",
+                    "The Lion's Pride has more gossip than occult scholarship, but both can be useful.",
+                    "Every road in Elwynn seems to deposit another hopeful amateur here.",
+                    "A tidy little village, provided one ignores the kobolds and the shouting.",
+                },
+            },
+        },
+        ["Ironforge"] = {
+            ["The Great Forge"] = {
+                weight = 0.15,
+                lines = {
+                    "The Great Forge never sleeps, so the soot, noise, and dwarven stench never stop either.",
+                    "The forge is impressive; the company remains an unforgivable flaw.",
+                    "Heat, hammering, and beard smoke form Ironforge's signature atmosphere.",
+                    "Every spark is elegant until it lands in a dwarf's ale.",
+                    "A magnificent furnace surrounded by people determined to smell worse than coal.",
+                    "Endless stone corridors amplify every dwarven belch. These halls are intolerable.",
+                    "Ironforge turns bad air and loud masonry into a civic tradition.",
+                    "The ceilings are sturdy, the passages broad, and every resident objectionable.",
+                    "Stone preserves echoes remarkably well, especially the unpleasant ones.",
+                    "One could admire these halls if the dwarves would vacate them.",
+                },
+            },
+        },
         ["Durotar"] = {
             ["Skull Rock"] = { lines = { "Skull Rock is dark, enclosed, and named for a skull. Excellent taste." } },
             ["Dustwind Cave"] = { lines = { "Dustwind Cave keeps out the sun and most unwanted company. Delightful." } },

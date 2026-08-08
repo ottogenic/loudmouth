@@ -5,16 +5,40 @@
 
 local function findChildButton(prefix)
     if not LoudmouthConfigFrame then return nil end
-    for _, kid in ipairs({ LoudmouthConfigFrame:GetChildren() }) do
-        if kid.GetText and kid:GetText() and string.find(kid:GetText(), prefix, 1, true) then
-            return kid
+    local function walk(frame)
+        for _, kid in ipairs({ frame:GetChildren() }) do
+            if kid.GetText and kid:GetText() and string.find(kid:GetText(), prefix, 1, true) then
+                return kid
+            end
+            if kid.GetChildren then
+                local match = walk(kid)
+                if match then return match end
+            end
         end
     end
+    return walk(LoudmouthConfigFrame)
 end
 
-test("config panel exists after load", function()
+local function distinctLineCount(lines)
+    local seen, count = {}, 0
+    for _, line in ipairs(lines or {}) do
+        if not seen[line] then
+            seen[line] = true
+            count = count + 1
+        end
+    end
+    return count
+end
+
+test("config panel starts hidden and slash command toggles it", function()
     assertNotNil(LoudmouthConfigFrame)
     assertTrue(LoudmouthConfigFrame:IsObjectType("Frame"))
+    assertFalse(LoudmouthConfigFrame:IsShown())
+    SlashCmdList["LOUDMOUTH"]()
+    assertTrue(LoudmouthConfigFrame:IsShown())
+    SlashCmdList["LOUDMOUTH"]()
+    assertFalse(LoudmouthConfigFrame:IsShown())
+    SlashCmdList["LOUDMOUTH"]()
 end)
 
 test("Debug Mode button toggles state and updates its label", function()
@@ -43,6 +67,7 @@ test("Generate Macros button is clickable and handles a valid personality", func
     -- Clicking must not raise an error.
     local ok, err = pcall(function() btn:Click() end)
     assert(ok, err)
+    assertTrue(Loudmouth.GenerateMacros())
 end)
 
 test("Copy Errors button invokes the CopyChat module", function()
@@ -263,6 +288,63 @@ test("Warlock macro order and personality actions remain in parity", function()
     for action in pairs(personality.actions) do
         assertTrue(action == "Generic" or ordered[action] == true, "action has no generated macro: " .. action)
     end
+end)
+
+test("warlock spells and zones each have five distinct comments", function()
+    local personality = Loudmouth.Personalities["HumanFemaleWarlockProfessional"]
+    for action, entry in pairs(personality.actions) do
+        assertTrue(distinctLineCount(entry.lines) >= 5, "fewer than five distinct action lines: " .. action)
+    end
+    for zone, entry in pairs(personality.zones) do
+        assertTrue(distinctLineCount(entry.lines) >= 5, "fewer than five distinct zone lines: " .. zone)
+    end
+end)
+
+test("chance controls persist personality-scoped overrides", function()
+    local originalPersonality = Loudmouth.CurrentPersonality
+    Loudmouth.SetConfiguredChance("spell", "Shadow Bolt", 0.73)
+    assertAlmostEquals(0.73, Loudmouth.GetConfiguredChance("spell", "Shadow Bolt", 0.01), 0.001)
+    Loudmouth.ClearConfiguredChance("spell", "Shadow Bolt")
+    assertAlmostEquals(0.01, Loudmouth.GetConfiguredChance("spell", "Shadow Bolt", 0.01), 0.001)
+    Loudmouth.CurrentPersonality = originalPersonality
+end)
+
+test("sidebar pages and chance sliders are available", function()
+    assertNotNil(Loudmouth.ConfigPages.General)
+    assertNotNil(Loudmouth.ConfigPages.Spell)
+    assertNotNil(Loudmouth.ConfigPages.Zone)
+    assertNotNil(Loudmouth.ConfigPages.Target)
+    Loudmouth.ShowConfigPage("Spell")
+    assertTrue(Loudmouth.ConfigPages.Spell:IsShown())
+    assertFalse(Loudmouth.ConfigPages.General:IsShown())
+    assertNotNil(_G.LoudmouthSpellChanceSlider)
+    assertNotNil(_G.LoudmouthZoneChanceSlider)
+    assertNotNil(_G.LoudmouthTargetChanceSlider)
+
+    local spellEditor = Loudmouth.ChanceEditors[1]
+    _G.LoudmouthSpellChanceSlider:SetValue(0.5)
+    assertAlmostEquals(0.5, _G.LoudmouthSpellChanceSlider:GetValue(), 0.0001)
+    spellEditor:Refresh()
+    Loudmouth.ShowConfigPage("General")
+end)
+
+test("generic response macros provide eight sequential target-aware responses", function()
+    local personality = Loudmouth.Personalities["HumanFemaleWarlockProfessional"]
+    for _, responseKind in ipairs(Loudmouth.ResponseMacroOrder) do
+        local response = personality.responses[responseKind]
+        assertEquals(8, #response.target)
+        assertEquals(8, #response.noTarget)
+        assertContains(Loudmouth.BuildResponseMacroBody(responseKind), 'Loudmouth.Respond("' .. responseKind .. '")')
+    end
+
+    local targeted = Loudmouth.GetResponseMessage(personality, "Yes", { name = "Mira", class = "Mage" }, 1)
+    assertContains(targeted, "Mage")
+    assertFalse(string.find(targeted, "<target", 1, true) ~= nil)
+    local untargeted = Loudmouth.GetResponseMessage(personality, "Yes", nil, 1)
+    assertContains(untargeted, "friend")
+    local wrapped, index = Loudmouth.GetResponseMessage(personality, "Yes", nil, 9)
+    assertEquals(1, index)
+    assertEquals(untargeted, wrapped)
 end)
 
 test("zone comments are complete utterances rather than split continuations", function()
